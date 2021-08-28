@@ -82,7 +82,7 @@ namespace CardRotager {
                 });
                 drawler.DrawLines(graphics, ip.VLinesAll, Pens.Blue, sb, true, ImageProcessor.THICK);
 
-                rectangles = makeRect(sb, ip.HLinesAll, ip.VLinesAll, out List<double> angles);
+                rectangles = makeRect(sb, ip.HLinesAll, ip.VLinesAll, out List<float> angles);
 
                 //drawler.DrawRuler(graphics);
                 const int penWidth = 7;
@@ -121,17 +121,18 @@ namespace CardRotager {
             return bitmap;
         }
 
-        public static void copyRegionIntoImage(Graphics toGraphic, Rectangle toRegion, Bitmap fromBitmap, Rectangle fromRegion, double v, int extend) {
+        public static void copyRegionIntoImage(Graphics toGraphic, Rectangle toRegion, Bitmap fromBitmap, Rectangle fromRegion, float angle, int extend) {
             fromRegion.Inflate(new Size(extend, extend));
             int addX = (toRegion.Width - fromRegion.Width) / 2;
             int addY = (toRegion.Height - fromRegion.Height) / 2;
+
             toGraphic.DrawImage(fromBitmap, toRegion.X + addX, toRegion.Y + addY, fromRegion, GraphicsUnit.Pixel);
         }
 
-        private List<Rectangle> makeRect(StringBuilder sb, List<Edge> hLinesAll, List<Edge> vLinesAll, out List<double> angles) {
+        private List<Rectangle> makeRect(StringBuilder sb, List<Edge> hLinesAll, List<Edge> vLinesAll, out List<float> angles) {
             sb?.AppendFormat("\r\nГабариты карт:\r\n");
             List<Rectangle> rectangels = new List<Rectangle>();
-            angles = new List<double>();
+            angles = new List<float>();
             int i = 0;
             for (int hIndex = 0; hIndex < hLinesAll.Count; hIndex++) {
                 Edge hLine = hLinesAll[hIndex];
@@ -139,7 +140,7 @@ namespace CardRotager {
                     Edge vLine = vLinesAll[hIndex];
                     int minY = Math.Min(vLine.Y, hLine.Y);
                     int maxX = Math.Max(hLine.X2, vLine.X2);
-                    double angle = vLinesAll[hIndex].Angle;
+                    float angle = (float)vLinesAll[hIndex].Angle;
                     angles.Add(angle);
                     Rectangle item = new Rectangle(hLine.X, minY, maxX - hLine.X, vLine.Y2 - minY);
                     sb?.AppendFormat("{0}: {1}, {2}\r\n", i++, item, angle);
@@ -211,7 +212,7 @@ namespace CardRotager {
 
         private void prepareProcessImageState() {
             if (imageProcess == null) {
-                lbHintImageOpen.Text = "Открыть файл изображения с картами...\r\n(щелкните сюда)";
+                lbHintImageOpen.Text = "Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...";
                 lbHintImageProcess.Text = "Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)";
             } else if (imageProcess == false) {
                 lbHintImageProcess.Text = "Обработка изображения.\r\nФормирование итогового изображения...";

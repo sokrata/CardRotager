@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="code.txt" />
+    <Content Include="License.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
