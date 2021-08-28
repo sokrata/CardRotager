@@ -21,6 +21,11 @@ namespace CardRotager {
 
         List<Edge> hLinesAll = new List<Edge>();
         List<Edge> vLinesAll = new List<Edge>();
+        private Localize localize;
+
+        public ImageProcessor(Localize localize) {
+            this.localize = localize;
+        }
 
         public List<Edge> HLinesAll { get => hLinesAll; set => hLinesAll = value; }
         public List<Edge> VLinesAll { get => vLinesAll; set => vLinesAll = value; }
@@ -48,16 +53,16 @@ namespace CardRotager {
             dotLines = new List<Line>();
             showDots = null;
 
-            using (UnmanagedImage unmandImage = LinesDetectorBase.PrepareBitmap(bitmap, out BitmapData imageData)) {
+            using (UnmanagedImage unmandImage = LinesDetectorBase.prepareBitmap(bitmap, out BitmapData imageData)) {
                 try {
                     //горизонтальные линии:
-                    sb.AppendFormat("== Определение верхнего ряда горизонтальных линий (с мин. длиной: {0}) ==\r\n", KillLength);
+                    sb.AppendFormat(l("== Определение верхнего ряда горизонтальных линий (с мин. длиной: {0}) ==\r\n"), KillLength);
 
                     hLinesAll = makeFirstHLines(sb, unmandImage, width, height, KillLength, MIN_LINE_SIZE, THICK);
                     int colCount = hLinesAll.Count;
 
                     //вертикальные линии:
-                    sb?.AppendFormat("\r\n== Определение вертикальных линий (с мин. длиной: {0}) ==\r\n", KillLength);
+                    sb?.AppendFormat(l("\r\n== Определение вертикальных линий (с мин. длиной: {0}) ==\r\n"), KillLength);
 
                     for (int colIndex = colCount - 1; colIndex >= 0; colIndex--) {
                         List<Edge> vLines = processColumLines(unmandImage, colIndex, colCount, width, height, sb);
@@ -65,16 +70,16 @@ namespace CardRotager {
                     }
 
                     stopwatch.Stop();
-                    sb?.AppendFormat("\r\nОпределение вертикальных линий: Время {0} мс\r\n", stopwatch.ElapsedMilliseconds);
+                    sb?.AppendFormat(l("\r\nОпределение вертикальных линий: Время {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
                     stopwatch.Restart();
 
                     //второй цикл определения горизонтальных линий для добавленных вертикальных строк:
                     //горизонтальные 2:
                     List<Edge> vLineRows = makeLineRows(sb);
-                    sb?.AppendFormat("\r\n== Second cycle: Horizontal Lines (minLength: {0}) ==\r\n", KillLength);
+                    sb?.AppendFormat(l("\r\n== Second cycle: Horizontal Lines (minLength: {0}) ==\r\n"), KillLength);
 
                     for (int rowIndex = rowCount - 1; rowIndex > 0; rowIndex--) {
-                        sb?.AppendFormat("\r\n- {0} rowIndex:\r\n\r\n", rowIndex);
+                        sb?.AppendFormat(l("\r\n- {0} rowIndex:\r\n\r\n"), rowIndex);
                         getRangeY(height, vLineRows, rowIndex, out int minY, out int maxY);
 
                         //линии верхняя и нижняя для отображения позже на форме
@@ -108,7 +113,11 @@ namespace CardRotager {
             WinSpecific.clearMemory();
 
             stopwatch.Stop();
-            sb?.AppendFormat("\r\nФормирование сетки линий: Время {0} мс\r\n", stopwatch.ElapsedMilliseconds);
+            sb?.AppendFormat(l("\r\nФормирование сетки линий: Время {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
+        }
+
+        private string l(string text) {
+            return localize.localize(text);
         }
 
         private static void getRangeY(int height, List<Edge> vLineRows, int rowIndex, out int minY, out int maxY) {
@@ -128,7 +137,7 @@ namespace CardRotager {
         }
 
         private List<Edge> makeLineRows(StringBuilder sb) {
-            sb?.Append("\r\n== Формируем строчки вертикальных линий ==\r\n\r\n");
+            sb?.Append(l("\r\n== Формируем строчки вертикальных линий ==\r\n\r\n"));
 
             List<Edge> vLineRows = new List<Edge>();
             vLineRows.AddRange(VLinesAll);
@@ -178,7 +187,7 @@ namespace CardRotager {
                 }
             }
             if (sb != null) {
-                sb.AppendFormat("\r\nколонка: {0}\r\n", colIndex);
+                sb.AppendFormat(l("\r\nколонка: {0}\r\n"), colIndex);
                 for (int i = 0; i < vLines.Count; i++) {
                     Edge item = vLines[i];
                     sb.AppendFormat("{0}: {1}\r\n", i, item);

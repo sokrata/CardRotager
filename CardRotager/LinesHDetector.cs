@@ -1,4 +1,5 @@
 ﻿using AForge.Imaging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -59,7 +60,7 @@ namespace CardRotager {
             //string.Format(":: {0}, {1} = {3}, {4}, {5}, {6} == {2}", x, y, Util.ToHtml(color), color.A, color.R, color.G, color.B));
             #endregion
             stopwatch.Stop();
-            Debug.WriteLine(string.Format("FillHorLine: {0} мс", stopwatch.ElapsedMilliseconds));
+            Debug.WriteLine(string.Format(l("FillHorLine: {0} мс"), stopwatch.ElapsedMilliseconds));
             return dots;
         }
 
@@ -89,7 +90,7 @@ namespace CardRotager {
                             }
                         }
                         if (debug) {
-                            sb?.AppendFormat("delIndex = {0}: {1}\r\n", lineIndex, curLine);
+                            sb?.AppendFormat(l("delIndex = {0}: {1}\r\n"), lineIndex, curLine);
                         }
 
                         if (curLine.X - prevLine.X2 < killLength) {
@@ -106,7 +107,7 @@ namespace CardRotager {
             }
 
             if (sb != null && debug) {
-                sb.AppendLine("Все длинные линии:");
+                sb.AppendLine(l("Все длинные линии:"));
                 for (int i = 0; i < lines.Count; i++) {
                     sb.AppendFormat("{0}: {1}\r\n", i, lines[i]);
                 }
@@ -135,14 +136,14 @@ namespace CardRotager {
                 longestLines.Add(maxIndex);
             }
             if (sb != null && debug) {
-                sb.AppendLine("Список длинных линий:");
+                sb.AppendLine(l("Список длинных линий:"));
                 for (int i = 0; i < longestLines.Count; i++) {
                     int v1 = longestLines[i];
                     sb.AppendFormat(@"{0} [{1}]: {2}", i, v1, lines[v1]);
                     sb.AppendLine();
                 }
                 sb.AppendLine();
-                sb.AppendLine("Формирование единой непрерывной линии:");
+                sb.AppendLine(l("Формирование единой непрерывной линии:"));
             }
 
             int sbInsert = 0;
@@ -160,7 +161,7 @@ namespace CardRotager {
                     Edge maxLine = lines[maxIndex];
 
                     if (sb != null && debug) {
-                        sb2 = new StringBuilder(string.Format("process {0}: {1}\r\n", maxIndex, maxLine));
+                        sb2 = new StringBuilder(string.Format(l("process {0}: {1}\r\n"), maxIndex, maxLine));
                     }
                     //ruler.drawLine(maxLine, Pens.GreenYellow, 0);
 
@@ -176,11 +177,11 @@ namespace CardRotager {
                         if (curEdge.Terminate) {
                             break;
                         }
-                        if (InRange(longEdge.Y, curEdge.Y2, checkRadiusY)) {
+                        if (inRange(longEdge.Y, curEdge.Y2, checkRadiusY)) {
                             longEdge.X = curEdge.X;
                         }
                         if (sb2 != null && debug) {
-                            sb2.AppendFormat("Назад {0} объединена {2}: {1})\r\n", maxIndex, longEdge, curIndex);
+                            sb2.AppendFormat(l("Назад {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
                         }
                         lines.RemoveAt(curIndex);
                         longestIndex--;
@@ -194,11 +195,11 @@ namespace CardRotager {
                     curIndex = longestIndex + 1;
                     while (curIndex < lines.Count) {
                         Edge curEdge = lines[curIndex];
-                        if (InRange(longEdge.Y2, curEdge.Y, checkRadiusY)) {
+                        if (inRange(longEdge.Y2, curEdge.Y, checkRadiusY)) {
                             longEdge.X2 = curEdge.X2;
                         }
                         if (sb2 != null && debug) {
-                            sb2.AppendFormat("Вперед {0} объединена {2}: {1})\r\n", maxIndex, longEdge, curIndex);
+                            sb2.AppendFormat(l("Вперед {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
                         }
                         lines.RemoveAt(curIndex);
                         if (curEdge.Terminate) {
@@ -213,7 +214,6 @@ namespace CardRotager {
             }
             return lines;
         }
-
 
         /// <summary>
         /// Создаем горизонтальные линии из точек dots в диапазоне startX, width объединяя в линию точки отличающие по Y не более чем +/-checkRadiusY
@@ -237,7 +237,7 @@ namespace CardRotager {
                     if (lines.Count != 0) {
                         lines[lines.Count - 1].Terminate = true;
                     }
-                    AddNewEdge(lines, xCoord, dotY, false);
+                    addNewEdge(lines, xCoord, dotY, false);
                     wasGap = false;
                     continue;
                 }
@@ -246,16 +246,16 @@ namespace CardRotager {
                     continue;
                 }
                 //проверяем что предыдущая точка была недалеко по Y
-                if (InRange(dotY, dots[xCoord - 1], checkRadiusDotY)) {
+                if (inRange(dotY, dots[xCoord - 1], checkRadiusDotY)) {
                     if (lines.Count == 0) {
-                        AddNewEdge(lines, xCoord, dotY, false);
+                        addNewEdge(lines, xCoord, dotY, false);
                     }
                     Edge lastEdge = lines[lines.Count - 1];
-                    if (InRange(dotY, lastEdge.Y2, checkRadiusY)) {
+                    if (inRange(dotY, lastEdge.Y2, checkRadiusY)) {
                         lastEdge.X2 = xCoord;
                         lastEdge.Y2 = dotY;
                     } else {
-                        AddNewEdge(lines, xCoord, dotY, false);
+                        addNewEdge(lines, xCoord, dotY, false);
                     }
                 }
 

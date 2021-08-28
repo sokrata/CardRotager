@@ -24,11 +24,12 @@ namespace CardRotager {
         private string fileName;
         public Drawler drawler;
         private List<Rectangle> rectangles;
-
+        public static Localize localize;
 
         public MainForm() {
             InitializeComponent();
             imageProcess = null;
+            localize = new Localize();
 
             pbBlackWhite.MouseWheel += pictureBox_MouseWheel;
             pbOriginal.MouseWheel += pictureBox_MouseWheel;
@@ -36,6 +37,7 @@ namespace CardRotager {
         }
 
         private void form1_Load(object sender, EventArgs e) {
+            localizeControl();
             //fileName = @"C:\Users\sokra\OneDrive\Рабочий стол\www\17 + 18.Оборот.jpg";
             if (Directory.Exists("S:\\2021-08-21\\Дилеммы короля\\конверты")) {
                 fileName = @"S:\2021-08-21\Дилеммы короля\конверты\17+18. Оборот.jpg";
@@ -46,9 +48,32 @@ namespace CardRotager {
             //fileName = @"C:\Users\sokra\OneDrive\Рабочий стол\www\17+18. Оборот.jpg";
         }
 
+        private void localizeControl() {
+            localize.loadTranslatedText();
+            localize.localizeControl(lbHintImageOpen);
+            localize.localizeControl(lbHintImageProcess);
+            localize.localizeControl(this);
+            localize.localizeControl(tabPageBW);
+            localize.localizeControl(tabPageImage);
+            localize.localizeControl(MenuImage);
+            localize.localizeControl(MenuImage);
+            localize.localizeControl(MenuImageOpenItem);
+            localize.localizeControl(MenuImageCloseItem);
+            localize.localizeControl(MenuImageExitItem);
+            localize.localizeControl(MenuImageOpenButton);
+            localize.localizeControl(MenuImageProcessItem);
+            localize.localizeControl(MenuImageSaveButton);
+            localize.localizeControl(MenuView);
+            localize.localizeControl(MenuView10PercentItem);
+            localize.localizeControl(MenuViewFitItem);
+            localize.localizeControl(MenuViewScrollItem);
+            localize.localizeControl(MenuProcessButton);
+            localize.localizeControl(label1);
+        }
+
         private void processImage() {
             StringBuilder sb = new StringBuilder();
-            ImageProcessor ip = new ImageProcessor();
+            ImageProcessor ip = new ImageProcessor(localize);
             Bitmap bitmap = ((Bitmap)pbBlackWhite.Image);
             pbTarget.Image = null;
 
@@ -69,13 +94,13 @@ namespace CardRotager {
                     graphics.DrawLine(blackPen, item.X, item.Y1, item.X2, item.Y2);
                 }
 
-                sb?.AppendFormat("\r\nИтоговые горизонтальные линии: \r\n");
+                sb?.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
                 ip.HLinesAll.Sort((x, y) => x.Y.CompareTo(y.Y));
                 drawler.DrawLines(graphics, ip.HLinesAll, Pens.Cyan, sb, true, ImageProcessor.THICK);
 
-                sb?.AppendFormat("\r\nИтоговые вертикальные линии: \r\n");
+                sb?.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
                 ip.VLinesAll.Sort((line1, line2) => {
-                    if (LinesDetectorBase.InRange(line1.Y, line2.Y, 100)) {
+                    if (LinesDetectorBase.inRange(line1.Y, line2.Y, 100)) {
                         return line1.X.CompareTo(line2.X);
                     }
                     return line1.Y.CompareTo(line2.Y);
@@ -112,6 +137,9 @@ namespace CardRotager {
             WinSpecific.clearMemory();
         }
 
+        private string l(string text) {
+            return localize.localize(text);
+        }
 
         public static Bitmap createEmtpyBitmapSource(int width, int height, Bitmap bitmapOriginal) {
             PixelFormat pf = bitmapOriginal.PixelFormat;
@@ -130,7 +158,7 @@ namespace CardRotager {
         }
 
         private List<Rectangle> makeRect(StringBuilder sb, List<Edge> hLinesAll, List<Edge> vLinesAll, out List<float> angles) {
-            sb?.AppendFormat("\r\nГабариты карт:\r\n");
+            sb?.AppendFormat(l("\r\nГабариты карт:\r\n"));
             List<Rectangle> rectangels = new List<Rectangle>();
             angles = new List<float>();
             int i = 0;
@@ -191,7 +219,7 @@ namespace CardRotager {
 
                 Text = fileName;
             } catch (Exception ex) {
-                MessageBox.Show("Ошибка: " + ex.Message, "Невозможно открыть файл", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(l("Ошибка: ") + ex.Message, l("Невозможно открыть файл"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             WinSpecific.clearMemory();
         }
@@ -212,12 +240,12 @@ namespace CardRotager {
 
         private void prepareProcessImageState() {
             if (imageProcess == null) {
-                lbHintImageOpen.Text = "Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...";
-                lbHintImageProcess.Text = "Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)";
+                lbHintImageOpen.Text = l("Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...");
+                lbHintImageProcess.Text = l("Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)");
             } else if (imageProcess == false) {
-                lbHintImageProcess.Text = "Обработка изображения.\r\nФормирование итогового изображения...";
+                lbHintImageProcess.Text = l("Обработка изображения.\r\nФормирование итогового изображения...");
             } else {
-                lbHintImageOpen.Text = "Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...";
+                lbHintImageOpen.Text = l("Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...");
             }
             Application.DoEvents();
             WinSpecific.UseWaitCursor = true;
@@ -233,11 +261,11 @@ namespace CardRotager {
                 lbHintImageProcess.Visible = false;
                 imageProcess = true;
             } else {
-                Debug.WriteLine("Изображение обработано");
+                Debug.WriteLine(l("Изображение обработано"));
                 lbHintImageOpen.Visible = true;
                 lbHintImageProcess.Visible = true;
-                lbHintImageOpen.Text = "Открыть файл изображения с картами...\r\n(щелкните сюда)";
-                lbHintImageProcess.Text = "Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)";
+                lbHintImageOpen.Text = l("Открыть файл изображения с картами...\r\n(щелкните сюда)");
+                lbHintImageProcess.Text = l("Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)");
             }
             WinSpecific.UseWaitCursor = false;
             Application.DoEvents();
@@ -408,6 +436,23 @@ namespace CardRotager {
 
         private void menuImageProcessItem_Click(object sender, EventArgs e) {
             workFlowImageProcessExecute();
+        }
+
+        private void saveTextForTranslateToolStripMenuItem_Click(object sender, EventArgs e) {
+            localize.saveCollectedLine();
+        }
+
+        private void englishToolStripMenuItem_Click(object sender, EventArgs e) {
+            Localize.Language = "en-US";
+            localizeControl();
+        }
+
+        private void russianToolStripMenuItem_Click(object sender, EventArgs e) {
+            Localize.Language = null;
+            localize.revert(true);
+            localizeControl();
+            localize.revert(false);
+            localize.resetLoadTranslate();
         }
     }
 

@@ -9,24 +9,24 @@ namespace CardRotager {
         public LinesDetectorBase() {
         }
 
-        public static UnmanagedImage PrepareBitmap(Bitmap bitmap, out BitmapData imageData) {
+        public static UnmanagedImage prepareBitmap(Bitmap bitmap, out BitmapData imageData) {
             imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                 ImageLockMode.ReadWrite, bitmap.PixelFormat);
             return new UnmanagedImage(imageData);
         }
 
-        public static void AddNewEdge(List<Edge> list, int x, int y, bool terminate) {
+        public static void addNewEdge(List<Edge> list, int x, int y, bool terminate) {
             Edge edge = new Edge(x, y, x, y, terminate, 0);
-            InsertNewLine(list, true, edge);
+            insertNewLine(list, true, edge);
             //return edge;
         }
-        public static void PrependNewEdge(List<Edge> list, int x, int y, bool terminate) {
+        public static void prependNewEdge(List<Edge> list, int x, int y, bool terminate) {
             Edge edge = new Edge(x, y, x, y, terminate, 0);
-            InsertNewLine(list, false, edge);
+            insertNewLine(list, false, edge);
             //return edge;
         }
 
-        public static void InsertNewLine(List<Edge> lines, bool toEnd, Edge edge) {
+        public static void insertNewLine(List<Edge> lines, bool toEnd, Edge edge) {
             if (toEnd) {
                 lines.Add(edge);
             } else {
@@ -41,11 +41,15 @@ namespace CardRotager {
         /// <param name="checkValue"></param>
         /// <param name="checkRadius"></param>
         /// <returns></returns>
-        public static bool InRange(int curValue, int checkValue, int checkRadius) {
+        public static bool inRange(int curValue, int checkValue, int checkRadius) {
             return checkValue - checkRadius < curValue && curValue < checkValue + checkRadius;
         }
+        public static string l(string text) {
+            return MainForm.localize.localize(text);
+        }
 
-        public float GetBrightness(int R, int G, int B) {
+
+        public float getBrightness(int R, int G, int B) {
             float r = (float)R / 255.0f;
             float g = (float)G / 255.0f;
             float b = (float)B / 255.0f;

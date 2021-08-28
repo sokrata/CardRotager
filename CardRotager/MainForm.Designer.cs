@@ -40,6 +40,8 @@ namespace CardRotager {
             this.panelImage = new System.Windows.Forms.Panel();
             this.pbBlackWhite = new System.Windows.Forms.PictureBox();
             this.splitPanelButtonAndLog = new System.Windows.Forms.SplitContainer();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tbLog = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -67,10 +69,12 @@ namespace CardRotager {
             this.pasteToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ButtonScale10percent = new System.Windows.Forms.ToolStripButton();
-            this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.MenuProcessButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.saveTextForTranslateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.localeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.englishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.russianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPageImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerImage)).BeginInit();
@@ -116,7 +120,7 @@ namespace CardRotager {
             this.tabPageImage.Location = new System.Drawing.Point(4, 29);
             this.tabPageImage.Name = "tabPageImage";
             this.tabPageImage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageImage.Size = new System.Drawing.Size(2734, 1539);
+            this.tabPageImage.Size = new System.Drawing.Size(2734, 1536);
             this.tabPageImage.TabIndex = 1;
             this.tabPageImage.Text = "Изображение";
             this.tabPageImage.UseVisualStyleBackColor = true;
@@ -134,7 +138,7 @@ namespace CardRotager {
             // splitContainerImage.Panel2
             // 
             this.splitContainerImage.Panel2.Controls.Add(this.panelTarget);
-            this.splitContainerImage.Size = new System.Drawing.Size(2728, 1533);
+            this.splitContainerImage.Size = new System.Drawing.Size(2728, 1530);
             this.splitContainerImage.SplitterDistance = 908;
             this.splitContainerImage.TabIndex = 1;
             // 
@@ -147,7 +151,7 @@ namespace CardRotager {
             this.panelOriginal.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelOriginal.Location = new System.Drawing.Point(0, 0);
             this.panelOriginal.Name = "panelOriginal";
-            this.panelOriginal.Size = new System.Drawing.Size(908, 1533);
+            this.panelOriginal.Size = new System.Drawing.Size(908, 1530);
             this.panelOriginal.TabIndex = 1;
             // 
             // lbHintImageOpen
@@ -156,7 +160,7 @@ namespace CardRotager {
             this.lbHintImageOpen.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lbHintImageOpen.Location = new System.Drawing.Point(0, 0);
             this.lbHintImageOpen.Name = "lbHintImageOpen";
-            this.lbHintImageOpen.Size = new System.Drawing.Size(908, 1533);
+            this.lbHintImageOpen.Size = new System.Drawing.Size(908, 1530);
             this.lbHintImageOpen.TabIndex = 1;
             this.lbHintImageOpen.Text = "Открыть файл изображения с картами...\r\n(щелкните сюда)\r\n";
             this.lbHintImageOpen.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -180,7 +184,7 @@ namespace CardRotager {
             this.panelTarget.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelTarget.Location = new System.Drawing.Point(0, 0);
             this.panelTarget.Name = "panelTarget";
-            this.panelTarget.Size = new System.Drawing.Size(1816, 1533);
+            this.panelTarget.Size = new System.Drawing.Size(1816, 1530);
             this.panelTarget.TabIndex = 2;
             // 
             // lbHintImageProcess
@@ -189,10 +193,10 @@ namespace CardRotager {
             this.lbHintImageProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lbHintImageProcess.Location = new System.Drawing.Point(0, 0);
             this.lbHintImageProcess.Name = "lbHintImageProcess";
-            this.lbHintImageProcess.Size = new System.Drawing.Size(1816, 1533);
+            this.lbHintImageProcess.Size = new System.Drawing.Size(1816, 1530);
             this.lbHintImageProcess.TabIndex = 2;
-            this.lbHintImageProcess.Text = "Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда" +
-    ")";
+            this.lbHintImageProcess.Text = "Сформировать файл изображения с отцентированными изображениями карт\r\n(щелкните сю" +
+    "да)";
             this.lbHintImageProcess.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lbHintImageProcess.Click += new System.EventHandler(this.lbHintProcess_Click);
             // 
@@ -278,6 +282,22 @@ namespace CardRotager {
             this.splitPanelButtonAndLog.SplitterDistance = 64;
             this.splitPanelButtonAndLog.TabIndex = 14;
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(106, 6);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 26);
+            this.textBox1.TabIndex = 2;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 9);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(51, 20);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "label2";
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -307,7 +327,8 @@ namespace CardRotager {
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuImage,
             this.MenuView,
-            this.MenuForm});
+            this.MenuForm,
+            this.localeToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(2742, 33);
@@ -324,7 +345,7 @@ namespace CardRotager {
             this.toolStripMenuItem2,
             this.MenuImageExitItem});
             this.MenuImage.Name = "MenuImage";
-            this.MenuImage.Size = new System.Drawing.Size(141, 29);
+            this.MenuImage.Size = new System.Drawing.Size(141, 32);
             this.MenuImage.Text = "&Изображение";
             // 
             // MenuImageOpenItem
@@ -376,14 +397,14 @@ namespace CardRotager {
             this.toolStripMenuItem3,
             this.MenuView10PercentItem});
             this.MenuView.Name = "MenuView";
-            this.MenuView.Size = new System.Drawing.Size(58, 29);
+            this.MenuView.Size = new System.Drawing.Size(58, 32);
             this.MenuView.Text = "&Вид";
             // 
             // MenuViewFitItem
             // 
             this.MenuViewFitItem.Name = "MenuViewFitItem";
             this.MenuViewFitItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.MenuViewFitItem.Size = new System.Drawing.Size(230, 34);
+            this.MenuViewFitItem.Size = new System.Drawing.Size(270, 34);
             this.MenuViewFitItem.Text = "&Заполнить";
             this.MenuViewFitItem.Click += new System.EventHandler(this.fitToolStripMenuItem_Click);
             // 
@@ -391,20 +412,20 @@ namespace CardRotager {
             // 
             this.MenuViewScrollItem.Name = "MenuViewScrollItem";
             this.MenuViewScrollItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.MenuViewScrollItem.Size = new System.Drawing.Size(230, 34);
+            this.MenuViewScrollItem.Size = new System.Drawing.Size(270, 34);
             this.MenuViewScrollItem.Text = "Как есть";
             this.MenuViewScrollItem.Click += new System.EventHandler(this.scrollToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(227, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(267, 6);
             // 
             // MenuView10PercentItem
             // 
             this.MenuView10PercentItem.Name = "MenuView10PercentItem";
             this.MenuView10PercentItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.MenuView10PercentItem.Size = new System.Drawing.Size(230, 34);
+            this.MenuView10PercentItem.Size = new System.Drawing.Size(270, 34);
             this.MenuView10PercentItem.Text = "10%";
             this.MenuView10PercentItem.Click += new System.EventHandler(this.menuItem10Percent_Click);
             // 
@@ -412,22 +433,23 @@ namespace CardRotager {
             // 
             this.MenuForm.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.конверторToolStripMenuItem,
-            this.form2ToolStripMenuItem1});
+            this.form2ToolStripMenuItem1,
+            this.saveTextForTranslateToolStripMenuItem});
             this.MenuForm.Name = "MenuForm";
-            this.MenuForm.Size = new System.Drawing.Size(89, 29);
+            this.MenuForm.Size = new System.Drawing.Size(89, 32);
             this.MenuForm.Text = "Формы";
             // 
             // конверторToolStripMenuItem
             // 
             this.конверторToolStripMenuItem.Name = "конверторToolStripMenuItem";
-            this.конверторToolStripMenuItem.Size = new System.Drawing.Size(204, 34);
+            this.конверторToolStripMenuItem.Size = new System.Drawing.Size(285, 34);
             this.конверторToolStripMenuItem.Text = "Конвертор";
             this.конверторToolStripMenuItem.Click += new System.EventHandler(this.form2ToolStripMenuItem_Click);
             // 
             // form2ToolStripMenuItem1
             // 
             this.form2ToolStripMenuItem1.Name = "form2ToolStripMenuItem1";
-            this.form2ToolStripMenuItem1.Size = new System.Drawing.Size(204, 34);
+            this.form2ToolStripMenuItem1.Size = new System.Drawing.Size(285, 34);
             this.form2ToolStripMenuItem1.Text = "Form2";
             this.form2ToolStripMenuItem1.Click += new System.EventHandler(this.form2ToolStripMenuItem1_Click);
             // 
@@ -444,7 +466,7 @@ namespace CardRotager {
             this.pasteToolStripButton,
             this.toolStripSeparator1,
             this.ButtonScale10percent,
-            this.newToolStripButton});
+            this.MenuProcessButton});
             this.toolStrip1.Location = new System.Drawing.Point(4, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(580, 69);
@@ -458,7 +480,7 @@ namespace CardRotager {
             this.MenuImageOpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.MenuImageOpenButton.Name = "MenuImageOpenButton";
             this.MenuImageOpenButton.Size = new System.Drawing.Size(64, 64);
-            this.MenuImageOpenButton.Text = "&Open";
+            this.MenuImageOpenButton.Text = "&Открыть";
             this.MenuImageOpenButton.Click += new System.EventHandler(this.menuImageOpen_Click);
             // 
             // MenuImageSaveButton
@@ -519,14 +541,14 @@ namespace CardRotager {
             this.ButtonScale10percent.Text = "Масштаб 10%";
             this.ButtonScale10percent.Click += new System.EventHandler(this.menuItem10Percent_Click);
             // 
-            // newToolStripButton
+            // MenuProcessButton
             // 
-            this.newToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripButton.Image")));
-            this.newToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.newToolStripButton.Name = "newToolStripButton";
-            this.newToolStripButton.Size = new System.Drawing.Size(166, 64);
-            this.newToolStripButton.Text = "&Обработка";
-            this.newToolStripButton.Click += new System.EventHandler(this.buttonProcess_Click);
+            this.MenuProcessButton.Image = ((System.Drawing.Image)(resources.GetObject("MenuProcessButton.Image")));
+            this.MenuProcessButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.MenuProcessButton.Name = "MenuProcessButton";
+            this.MenuProcessButton.Size = new System.Drawing.Size(166, 64);
+            this.MenuProcessButton.Text = "&Обработка";
+            this.MenuProcessButton.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // toolStripContainer1
             // 
@@ -546,21 +568,35 @@ namespace CardRotager {
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
             // 
-            // label2
+            // saveTextForTranslateToolStripMenuItem
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 9);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(51, 20);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "label2";
+            this.saveTextForTranslateToolStripMenuItem.Name = "saveTextForTranslateToolStripMenuItem";
+            this.saveTextForTranslateToolStripMenuItem.Size = new System.Drawing.Size(285, 34);
+            this.saveTextForTranslateToolStripMenuItem.Text = "Save text for translate";
+            this.saveTextForTranslateToolStripMenuItem.Click += new System.EventHandler(this.saveTextForTranslateToolStripMenuItem_Click);
             // 
-            // textBox1
+            // localeToolStripMenuItem
             // 
-            this.textBox1.Location = new System.Drawing.Point(106, 6);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 26);
-            this.textBox1.TabIndex = 2;
+            this.localeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.englishToolStripMenuItem,
+            this.russianToolStripMenuItem});
+            this.localeToolStripMenuItem.Name = "localeToolStripMenuItem";
+            this.localeToolStripMenuItem.Size = new System.Drawing.Size(105, 29);
+            this.localeToolStripMenuItem.Text = "Language";
+            // 
+            // englishToolStripMenuItem
+            // 
+            this.englishToolStripMenuItem.Name = "englishToolStripMenuItem";
+            this.englishToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.englishToolStripMenuItem.Text = "English";
+            this.englishToolStripMenuItem.Click += new System.EventHandler(this.englishToolStripMenuItem_Click);
+            // 
+            // russianToolStripMenuItem
+            // 
+            this.russianToolStripMenuItem.Name = "russianToolStripMenuItem";
+            this.russianToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.russianToolStripMenuItem.Text = "Russian";
+            this.russianToolStripMenuItem.Click += new System.EventHandler(this.russianToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -624,7 +660,7 @@ namespace CardRotager {
         private System.Windows.Forms.TextBox tbLog;
         public System.Windows.Forms.PictureBox pbBlackWhite;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton newToolStripButton;
+        private System.Windows.Forms.ToolStripButton MenuProcessButton;
         private System.Windows.Forms.ToolStripButton MenuImageOpenButton;
         private System.Windows.Forms.ToolStripButton MenuImageSaveButton;
         private System.Windows.Forms.ToolStripButton printToolStripButton;
@@ -657,6 +693,10 @@ namespace CardRotager {
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ToolStripMenuItem saveTextForTranslateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem localeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
     }
 }
 

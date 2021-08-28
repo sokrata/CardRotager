@@ -1,0 +1,34 @@
+Открыть файл изображения с картами...\r\n(щелкните сюда)\r\n=Open image file with maps ...\r\n (click here)\r\n
+Сформировать файл изображения с отцентированными изображениями карт\r\n(щелкните сюда)=Generate image file with centered map images \r\n (click here)
+Переразмещение карт в скане графического файла в центрах указанной сетки=Repositioning maps in a scan of a graphic file in the centers of the specified grid
+Открытие изображение.\r\nФормирование промежуточного ч/б изображения на закладке 'Обработка'...=Opening an image.\r\n Forming an intermediate b/w image on the 'Processing' tab ...
+Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)=Generate image file with image-centered maps \r\n (click here)
+Обработка изображения.\r\nФормирование итогового изображения...=Image processing.\r\nForming the final image...
+\=\= Определение верхнего ряда горизонтальных линий (с мин. длиной: {0}) \=\=\r\n=\=\= Define the top row of horizontal lines (min. Length: {0}) \=\=\r\n
+\r\nОпределение вертикальных линий: Время {0} мс\r\n=\r\nDefine vertical lines: Time {0} ms\r\n
+\r\nФормирование сетки линий: Время {0} мс\r\n=\r\nGrid lines: Time {0} ms \r\n
+\r\nИтоговые горизонтальные линии: \r\n=\r\nThe resulting horizontal lines: \r\n
+\r\nИтоговые вертикальные линии: \r\n=\r\nThe resulting vertical lines: \r\n
+\r\nГабариты карт:\r\n=\r\nCard size: \r\n
+Обработка (Черно/Белое)=Processing (Black/White)
+Изображение=Image
+&Изображение=&Image
+&Открыть...=&Open...
+Закрыть=Close
+В&ыход=&Exit
+Обр&аботка=Pro&cess
+&Вид=&View
+&Заполнить=&Fit
+Как есть=Scroll
+\r\n\=\= Определение вертикальных линий (с мин. длиной: {0}) \=\=\r\n=\r\n\=\=Define vertical lines (min. length: {0})\=\=\r\n
+\r\n\=\= Формируем строчки вертикальных линий \=\=\r\n\r\n=\r\n\=\= Form lines of vertical lines \=\=\r\n\r\n
+&Image=&Image
+&Открыть=&Open
+&Save=&Save
+10%=10%
+&Обработка=&Process
+\r\n\=\= Second cycle: Horizontal Lines (minLength: {0}) \=\=\r\n=\r\n\=\= Second cycle: Horizontal Lines (minLength: {0}) \=\=\r\n
+Процесс обработки:=Process description:
+FillHorLine: {0} мс
+\r\nколонка: {0}\r\n=\r\ncolumn: {0} \r\n
+\r\n- {0} rowIndex:\r\n\r\n

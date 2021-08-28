@@ -62,6 +62,7 @@ namespace CardRotager {
             // 
             // menuStrip1
             // 
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
@@ -70,7 +71,7 @@ namespace CardRotager {
             this.saveToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1503, 33);
+            this.menuStrip1.Size = new System.Drawing.Size(1503, 36);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -79,7 +80,7 @@ namespace CardRotager {
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(38, 29);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(38, 32);
             this.toolStripMenuItem1.Text = "1";
             // 
             // openToolStripMenuItem
@@ -100,7 +101,7 @@ namespace CardRotager {
             this.centeredToolStripMenuItem,
             this.resetToolStripMenuItem});
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(75, 29);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(75, 32);
             this.toolStripMenuItem2.Text = "Mode";
             // 
             // sizeToolStripMenuItem
@@ -158,14 +159,14 @@ namespace CardRotager {
             // openToolStripMenuItem1
             // 
             this.openToolStripMenuItem1.Name = "openToolStripMenuItem1";
-            this.openToolStripMenuItem1.Size = new System.Drawing.Size(72, 29);
+            this.openToolStripMenuItem1.Size = new System.Drawing.Size(72, 32);
             this.openToolStripMenuItem1.Text = "Open";
             this.openToolStripMenuItem1.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(65, 29);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(65, 32);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -182,7 +183,7 @@ namespace CardRotager {
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.filteredPicture);
-            this.splitContainer1.Size = new System.Drawing.Size(1503, 893);
+            this.splitContainer1.Size = new System.Drawing.Size(1503, 890);
             this.splitContainer1.SplitterDistance = 805;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -191,7 +192,7 @@ namespace CardRotager {
             this.initialPicture.Dock = System.Windows.Forms.DockStyle.Fill;
             this.initialPicture.Location = new System.Drawing.Point(0, 0);
             this.initialPicture.Name = "initialPicture";
-            this.initialPicture.Size = new System.Drawing.Size(805, 893);
+            this.initialPicture.Size = new System.Drawing.Size(805, 890);
             this.initialPicture.TabIndex = 0;
             this.initialPicture.TabStop = false;
             // 
@@ -200,14 +201,14 @@ namespace CardRotager {
             this.filteredPicture.Dock = System.Windows.Forms.DockStyle.Fill;
             this.filteredPicture.Location = new System.Drawing.Point(0, 0);
             this.filteredPicture.Name = "filteredPicture";
-            this.filteredPicture.Size = new System.Drawing.Size(694, 893);
+            this.filteredPicture.Size = new System.Drawing.Size(694, 890);
             this.filteredPicture.TabIndex = 0;
             this.filteredPicture.TabStop = false;
             // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 33);
+            this.splitContainer2.Location = new System.Drawing.Point(0, 36);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -218,8 +219,8 @@ namespace CardRotager {
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.panel1);
-            this.splitContainer2.Size = new System.Drawing.Size(1503, 970);
-            this.splitContainer2.SplitterDistance = 893;
+            this.splitContainer2.Size = new System.Drawing.Size(1503, 967);
+            this.splitContainer2.SplitterDistance = 890;
             this.splitContainer2.TabIndex = 1;
             // 
             // panel1

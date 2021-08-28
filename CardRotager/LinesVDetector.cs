@@ -1,4 +1,5 @@
 ﻿using AForge.Imaging;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -50,7 +51,7 @@ namespace CardRotager {
                     continue;
                 }
                 if (wasGap && dotX != -1) {
-                    AddNewEdge(lines, dotX, yCoord, true);
+                    addNewEdge(lines, dotX, yCoord, true);
                     wasGap = false;
                     continue;
                 }
@@ -58,16 +59,16 @@ namespace CardRotager {
                     wasGap = true;
                     continue;
                 }
-                if (LinesDetectorBase.InRange(dotX, dots[yCoord - 1], checkRadiusY)) {
+                if (LinesDetectorBase.inRange(dotX, dots[yCoord - 1], checkRadiusY)) {
                     if (lines.Count == 0) {
-                        AddNewEdge(lines, dotX, yCoord, false);
+                        addNewEdge(lines, dotX, yCoord, false);
                     }
                     Edge lastEdge = lines[lines.Count - 1];
-                    if (dotX != -1 && InRange(dotX, lastEdge.X2, checkRadiusX)) {
+                    if (dotX != -1 && inRange(dotX, lastEdge.X2, checkRadiusX)) {
                         lastEdge.Y2 = yCoord;
                         lastEdge.X2 = dotX;
                     } else {
-                        AddNewEdge(lines, dotX, yCoord, false);
+                        addNewEdge(lines, dotX, yCoord, false);
                     }
                 }
             }
@@ -88,7 +89,7 @@ namespace CardRotager {
                             }
                         }
                         if (debug)
-                            sb?.AppendFormat("delIndex = {0}: {1}\r\n", lineIndex, lines[lineIndex]);
+                            sb?.AppendFormat(l("delIndex = {0}: {1}\r\n"), lineIndex, lines[lineIndex]);
                         if (lines[lineIndex].Y - lines[lineIndex - 1].Y2 < killLength) {
                             bool terminate = true;
                             if (lineIndex + 1 >= lines.Count
@@ -126,14 +127,14 @@ namespace CardRotager {
             }
 
             if (sb != null && debug) {
-                sb.AppendLine("Список длинных линий:");
+                sb.AppendLine(l("Список длинных линий:"));
                 for (int i = 0; i < longestLines.Count; i++) {
                     int v1 = longestLines[i];
                     sb.AppendFormat(@"{0} [{1}]: {2}", i, v1, lines[v1]);
                     sb.AppendLine();
                 }
                 sb.AppendLine();
-                sb.AppendLine("Формирование единой непрерывной линии:");
+                sb.AppendLine(l("Формирование единой непрерывной линии:"));
             }
 
             int sbInsert = 0;
@@ -149,7 +150,7 @@ namespace CardRotager {
                     Edge maxLine = lines[maxIndex];
 
                     if (sb != null && debug) {
-                        sb2 = new StringBuilder(string.Format("обработка {0}: {1}\r\n", maxIndex, maxLine));
+                        sb2 = new StringBuilder(string.Format(l("обработка {0}: {1}\r\n"), maxIndex, maxLine));
                     }
 
                     //есть самый длинный, ищем вверх все что на этой линии и объединяем
@@ -165,11 +166,11 @@ namespace CardRotager {
                         if (curEdge.Terminate) {
                             break;
                         }
-                        if (InRange(longEdge.X, curEdge.X2, checkRadiusX)) {
+                        if (inRange(longEdge.X, curEdge.X2, checkRadiusX)) {
                             longEdge.Y = curEdge.Y;
                         }
                         if (sb2 != null && debug) {
-                            sb2.AppendFormat("Назад {0} объединена {2}: {1})\r\n", maxIndex, longEdge, curIndex);
+                            sb2.AppendFormat(l("Назад {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
                         }
                         lines.RemoveAt(curIndex);
                         longestIndex--;
@@ -183,11 +184,11 @@ namespace CardRotager {
                     curIndex = longestIndex + 1;
                     while (curIndex < lines.Count) {
                         Edge curEdge = lines[curIndex];
-                        if (InRange(longEdge.X2, curEdge.X, checkRadiusX)) {
+                        if (inRange(longEdge.X2, curEdge.X, checkRadiusX)) {
                             longEdge.Y2 = curEdge.Y2;
                         }
                         if (sb2 != null && debug) {
-                            sb2.AppendFormat("Вперед {0} объединена {2}: {1})\r\n", maxIndex, longEdge, curIndex);
+                            sb2.AppendFormat(l("Вперед {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
                         }
                         lines.RemoveAt(curIndex);
                         if (curEdge.Terminate) {
@@ -203,7 +204,6 @@ namespace CardRotager {
 
             return lines;
         }
-
 
     }
 }
