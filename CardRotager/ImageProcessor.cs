@@ -26,7 +26,16 @@ namespace CardRotager {
         StringBuilder sb;
         private List<Line> dashLines;
         private List<Edge> angleEdges;
-        private int[] dots;
+
+        /// <summary>
+        /// Последний обработанный массив точек для горизонтальной линии
+        /// </summary>
+        private int[] dotsHorizontal;
+
+        /// <summary>
+        /// Последний обработанный массив точек для вертикальных линии
+        /// </summary>
+        private int[] dotsVertical;
 
         public ImageProcessor(Localize localize, StringBuilder sb) {
             this.localize = localize;
@@ -38,7 +47,8 @@ namespace CardRotager {
         public List<Edge> VLinesAll { get => vLinesAll; set => vLinesAll = value; }
         public List<Line> DashLines { get => dashLines; set => dashLines = value; }
         public List<Edge> AngleEdges { get => angleEdges; set => angleEdges = value; }
-        public int[] Dots { get => dots; set => dots = value; }
+        public int[] DotsHorizontal { get => dotsHorizontal; set => dotsHorizontal = value; }
+        public int[] DotsVertical { get => dotsVertical; set => dotsVertical = value; }
 
         /// <summary>
         /// Берем исходник в ч/б (с порогом, сделан в FileOpen - открыть). 
@@ -59,7 +69,7 @@ namespace CardRotager {
 
             DashLines = new List<Line>();
             AngleEdges = new List<Edge>();
-            dots = null;
+            dotsHorizontal = null;
 
             using (UnmanagedImage unmandImage = LinesDetectorBase.prepareBitmap(bitmap, out BitmapData imageData)) {
                 try {
@@ -73,7 +83,7 @@ namespace CardRotager {
                     sb?.AppendFormat(l("\r\n== Определение вертикальных линий (с мин. длиной: {0}) ==\r\n"), KillLength);
 
                     for (int colIndex = colCount - 1; colIndex >= 0; colIndex--) {
-                        List<Edge> vLines = processColumLines(unmandImage, colIndex, colCount, width, height, sb, out List<Edge> angleLines2);
+                        List<Edge> vLines = processColumLines(unmandImage, colIndex, colCount, width, height, out List<Edge> angleLines2);
                         AngleEdges.AddRange(angleLines2);
                         VLinesAll.AddRange(vLines);
                     }
@@ -88,29 +98,7 @@ namespace CardRotager {
                     sb?.AppendFormat(l("\r\n== Second cycle: Horizontal Lines (minLength: {0}) ==\r\n"), KillLength);
 
                     for (int rowIndex = rowCount - 1; rowIndex > 0; rowIndex--) {
-                        sb?.AppendFormat(l("\r\n- {0} rowIndex:\r\n\r\n"), rowIndex);
-                        getRangeY(height, vLineRows, rowIndex, out int minY, out int maxY);
-
-                        //линии верхняя и нижняя для отображения позже на форме
-                        DashLines.Add(new Line(0, minY, width, minY));
-                        DashLines.Add(new Line(0, maxY, width, maxY));
-
-                        //для текущей строки формируем строку точек ниже minY но выше maxY
-                        dots = linesHDetector.findHDots(unmandImage, width, height, minY, maxY);
-
-                        //получаем список всех горизонтальных линий из точек
-                        List<Edge> hLines = linesHDetector.createHLine(dots, KillLength, 0, width, debug: false);
-                        for (int lineIndex = hLines.Count - 1; lineIndex >= 0; lineIndex--) {
-                            if (hLines[lineIndex].Width < MIN_LINE_SIZE) {
-                                hLines.RemoveAt(lineIndex);
-                            }
-                        }
-                        if (sb != null) {
-                            for (int i = 0; i < hLines.Count; i++) {
-                                Edge item = hLines[i];
-                                sb?.AppendFormat("{0}: {1}\r\n", i, item);
-                            }
-                        }
+                        List<Edge> hLines = processRowLines(unmandImage, rowIndex, width, height, vLineRows);
                         hLinesAll.AddRange(hLines);
                     }
 
@@ -123,6 +111,67 @@ namespace CardRotager {
 
             stopwatch.Stop();
             sb?.AppendFormat(l("\r\nФормирование сетки линий: Время {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
+        }
+
+        /// <summary>
+        /// Обработка колонки линий:
+        /// 1. Определяем диапазон обрабатываемых X - GetMinMaxX
+        /// 2. Поиск вертикальных линий
+        /// </summary>
+        /// <param name="unmandImage"></param>
+        /// <param name="colIndex"></param>
+        /// <param name="colCount"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// 
+        /// <returns></returns>
+        private List<Edge> processColumLines(UnmanagedImage unmandImage, int colIndex, int colCount, int width, int height, out List<Edge> angleLines2) {
+            getRangeX(colIndex, colCount, width, out int minX, out int maxX);
+
+            dotsVertical = LinesVDetector.fillVDotsAll(minX, maxX, height, unmandImage);
+            List<Edge> vLines = LinesVDetector.createVLine(dotsVertical, sb, KillLength, 0, height, out angleLines2);
+            for (int lineIndex = vLines.Count - 1; lineIndex >= 0; lineIndex--) {
+                if (vLines[lineIndex].Height < MIN_LINE_SIZE) {
+                    vLines.RemoveAt(lineIndex);
+                }
+            }
+            if (sb != null) {
+                sb.AppendFormat(l("\r\nколонка: {0}\r\n"), colIndex);
+                for (int i = 0; i < vLines.Count; i++) {
+                    Edge item = vLines[i];
+                    sb.AppendFormat("{0}: {1}\r\n", i, item);
+                }
+            }
+            rowCount = Math.Max(rowCount, vLines.Count);
+            return vLines;
+        }
+
+        private List<Edge> processRowLines(UnmanagedImage unmandImage, int rowIndex, int width, int height, List<Edge> vLineRows) {
+            sb?.AppendFormat(l("\r\n- {0} rowIndex:\r\n\r\n"), rowIndex);
+            getRangeY(height, vLineRows, rowIndex, out int minY, out int maxY);
+
+            //линии верхняя и нижняя для отображения позже на форме
+            DashLines.Add(new Line(0, minY, width, minY));
+            DashLines.Add(new Line(0, maxY, width, maxY));
+
+            //для текущей строки формируем строку точек ниже minY но выше maxY
+            dotsHorizontal = linesHDetector.findHDots(unmandImage, width, height, minY, maxY);
+
+            //получаем список всех горизонтальных линий из точек
+            List<Edge> hLines = linesHDetector.createHLine(dotsHorizontal, KillLength, 0, width, debug: false);
+            for (int lineIndex = hLines.Count - 1; lineIndex >= 0; lineIndex--) {
+                if (hLines[lineIndex].Width < MIN_LINE_SIZE) {
+                    hLines.RemoveAt(lineIndex);
+                }
+            }
+            if (sb != null) {
+                for (int i = 0; i < hLines.Count; i++) {
+                    Edge item = hLines[i];
+                    sb?.AppendFormat("{0}: {1}\r\n", i, item);
+                }
+            }
+
+            return hLines;
         }
 
         private string l(string text) {
@@ -170,40 +219,6 @@ namespace CardRotager {
             }
 
             return vLineRows;
-        }
-
-        /// <summary>
-        /// Обработка колонки линий:
-        /// 1. Определяем диапазон обрабатываемых X - GetMinMaxX
-        /// 2. Поиск вертикальных линий
-        /// </summary>
-        /// <param name="unmandImage"></param>
-        /// <param name="colIndex"></param>
-        /// <param name="colCount"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="sb"></param>
-        /// 
-        /// <returns></returns>
-        private List<Edge> processColumLines(UnmanagedImage unmandImage, int colIndex, int colCount, int width, int height, StringBuilder sb, out List<Edge> angleLines2) {
-            getRangeX(colIndex, colCount, width, out int minX, out int maxX);
-
-            int[] dotsVert = LinesVDetector.fillVDotsAll(minX, maxX, height, unmandImage);
-            List<Edge> vLines = LinesVDetector.createVLine(dotsVert, sb, KillLength, 0, height, out angleLines2);
-            for (int lineIndex = vLines.Count - 1; lineIndex >= 0; lineIndex--) {
-                if (vLines[lineIndex].Height < MIN_LINE_SIZE) {
-                    vLines.RemoveAt(lineIndex);
-                }
-            }
-            if (sb != null) {
-                sb.AppendFormat(l("\r\nколонка: {0}\r\n"), colIndex);
-                for (int i = 0; i < vLines.Count; i++) {
-                    Edge item = vLines[i];
-                    sb.AppendFormat("{0}: {1}\r\n", i, item);
-                }
-            }
-            rowCount = Math.Max(rowCount, vLines.Count);
-            return vLines;
         }
 
         private void getRangeX(int colIndex, int colCount, int width, out int minX, out int maxX) {

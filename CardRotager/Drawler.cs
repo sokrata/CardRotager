@@ -35,7 +35,7 @@ namespace CardRotager {
             graphics.DrawLine(Pens.Green, x, 0, x, lineLen);
             graphics.DrawString(x.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, x + 2, 0);
         }
-                
+
         public void drawDotX(Graphics graphics, Pen p, int x, int y, int dotSide = 5) {
             graphics.DrawLine(p, x - dotSide, y, x + dotSide, y);
             graphics.DrawLine(p, x, y - dotSide, x, y + dotSide);
@@ -68,17 +68,23 @@ namespace CardRotager {
         }
 
 
-        public void drawDots(Graphics graphics, Pen red, int dotSide, int[] dots, bool isDotX = true) {
+        public void drawHorizontalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
             if (dots == null) {
                 return;
             }
             for (int x = 0; x < dots.Length; x++) {
                 int y = dots[x];
-                if (isDotX) {
-                    graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
-                } else {
-                    graphics.DrawLine(red, y - dotSide, x, y + dotSide, x);
-                }
+                graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
+            }
+        }
+
+        public void drawVerticalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
+            if (dots == null) {
+                return;
+            }
+            for (int x = 0; x < dots.Length; x++) {
+                int y = dots[x];
+                graphics.DrawLine(red, y - dotSide, x, y + dotSide, x);
             }
         }
 

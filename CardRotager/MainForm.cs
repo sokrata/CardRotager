@@ -93,7 +93,11 @@ namespace CardRotager {
             int width = bmpDraft.Width;
             int height = bmpDraft.Height;
             using (Graphics graphics = Graphics.FromImage(bmpDraft)) {
-                drawler.drawDots(graphics, Pens.Red, 2, ip.Dots, true);
+                if (showHelpLines) {
+                    //drawler.drawHorizontalDots(graphics, Pens.Red, 2, ip.DotsHorizontal);
+                    //drawler.drawVerticalDots(graphics, Pens.Red, 2, ip.DotsVertical);
+                }
+                //showHelpLines = false;
 
                 float[] dashValues = { 5, 2, 15, 4 };
                 Pen redDashPen = new Pen(Color.Red, 5) {
