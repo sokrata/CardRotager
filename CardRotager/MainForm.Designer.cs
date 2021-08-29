@@ -38,20 +38,22 @@ namespace CardRotager {
             this.tabPageBW = new System.Windows.Forms.TabPage();
             this.horSplitContainer = new System.Windows.Forms.SplitContainer();
             this.panelImage = new System.Windows.Forms.Panel();
-            this.pbBlackWhite = new System.Windows.Forms.PictureBox();
+            this.pbDraft = new System.Windows.Forms.PictureBox();
             this.splitPanelButtonAndLog = new System.Windows.Forms.SplitContainer();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tbLog = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.MenuImage = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuImageOpenItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuImageCloseItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageOpenItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageSaveDraftItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageSaveItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageCloseItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuImageProcessItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageProcessItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuImageExitItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageExitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuView = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuViewFitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuViewScrollItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,21 +62,21 @@ namespace CardRotager {
             this.MenuForm = new System.Windows.Forms.ToolStripMenuItem();
             this.конверторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.form2ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.MenuImageOpenButton = new System.Windows.Forms.ToolStripButton();
-            this.MenuImageSaveButton = new System.Windows.Forms.ToolStripButton();
-            this.printToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
-            this.copyToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.pasteToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.ButtonScale10percent = new System.Windows.Forms.ToolStripButton();
-            this.MenuProcessButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.saveTextForTranslateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.localeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuLanguage = new System.Windows.Forms.ToolStripMenuItem();
             this.englishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.russianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.menuImageOpenButton = new System.Windows.Forms.ToolStripButton();
+            this.menuImageSaveButton = new System.Windows.Forms.ToolStripButton();
+            this.printToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.menuCopyButton = new System.Windows.Forms.ToolStripButton();
+            this.menuPasteButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuScale10PercentButton = new System.Windows.Forms.ToolStripButton();
+            this.menuProcessButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.tabControl1.SuspendLayout();
             this.tabPageImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerImage)).BeginInit();
@@ -91,7 +93,7 @@ namespace CardRotager {
             this.horSplitContainer.Panel2.SuspendLayout();
             this.horSplitContainer.SuspendLayout();
             this.panelImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbBlackWhite)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbDraft)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitPanelButtonAndLog)).BeginInit();
             this.splitPanelButtonAndLog.Panel1.SuspendLayout();
             this.splitPanelButtonAndLog.Panel2.SuspendLayout();
@@ -120,7 +122,7 @@ namespace CardRotager {
             this.tabPageImage.Location = new System.Drawing.Point(4, 29);
             this.tabPageImage.Name = "tabPageImage";
             this.tabPageImage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageImage.Size = new System.Drawing.Size(2734, 1536);
+            this.tabPageImage.Size = new System.Drawing.Size(2734, 1539);
             this.tabPageImage.TabIndex = 1;
             this.tabPageImage.Text = "Изображение";
             this.tabPageImage.UseVisualStyleBackColor = true;
@@ -138,7 +140,7 @@ namespace CardRotager {
             // splitContainerImage.Panel2
             // 
             this.splitContainerImage.Panel2.Controls.Add(this.panelTarget);
-            this.splitContainerImage.Size = new System.Drawing.Size(2728, 1530);
+            this.splitContainerImage.Size = new System.Drawing.Size(2728, 1533);
             this.splitContainerImage.SplitterDistance = 908;
             this.splitContainerImage.TabIndex = 1;
             // 
@@ -151,7 +153,7 @@ namespace CardRotager {
             this.panelOriginal.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelOriginal.Location = new System.Drawing.Point(0, 0);
             this.panelOriginal.Name = "panelOriginal";
-            this.panelOriginal.Size = new System.Drawing.Size(908, 1530);
+            this.panelOriginal.Size = new System.Drawing.Size(908, 1533);
             this.panelOriginal.TabIndex = 1;
             // 
             // lbHintImageOpen
@@ -160,7 +162,7 @@ namespace CardRotager {
             this.lbHintImageOpen.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lbHintImageOpen.Location = new System.Drawing.Point(0, 0);
             this.lbHintImageOpen.Name = "lbHintImageOpen";
-            this.lbHintImageOpen.Size = new System.Drawing.Size(908, 1530);
+            this.lbHintImageOpen.Size = new System.Drawing.Size(908, 1533);
             this.lbHintImageOpen.TabIndex = 1;
             this.lbHintImageOpen.Text = "Открыть файл изображения с картами...\r\n(щелкните сюда)\r\n";
             this.lbHintImageOpen.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -184,7 +186,7 @@ namespace CardRotager {
             this.panelTarget.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelTarget.Location = new System.Drawing.Point(0, 0);
             this.panelTarget.Name = "panelTarget";
-            this.panelTarget.Size = new System.Drawing.Size(1816, 1530);
+            this.panelTarget.Size = new System.Drawing.Size(1816, 1533);
             this.panelTarget.TabIndex = 2;
             // 
             // lbHintImageProcess
@@ -193,7 +195,7 @@ namespace CardRotager {
             this.lbHintImageProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lbHintImageProcess.Location = new System.Drawing.Point(0, 0);
             this.lbHintImageProcess.Name = "lbHintImageProcess";
-            this.lbHintImageProcess.Size = new System.Drawing.Size(1816, 1530);
+            this.lbHintImageProcess.Size = new System.Drawing.Size(1816, 1533);
             this.lbHintImageProcess.TabIndex = 2;
             this.lbHintImageProcess.Text = "Сформировать файл изображения с отцентированными изображениями карт\r\n(щелкните сю" +
     "да)";
@@ -244,21 +246,21 @@ namespace CardRotager {
             this.panelImage.AutoScroll = true;
             this.panelImage.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panelImage.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.panelImage.Controls.Add(this.pbBlackWhite);
+            this.panelImage.Controls.Add(this.pbDraft);
             this.panelImage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelImage.Location = new System.Drawing.Point(0, 0);
             this.panelImage.Name = "panelImage";
             this.panelImage.Size = new System.Drawing.Size(2102, 1533);
             this.panelImage.TabIndex = 1;
             // 
-            // pbBlackWhite
+            // pbDraft
             // 
-            this.pbBlackWhite.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pbBlackWhite.Location = new System.Drawing.Point(0, 0);
-            this.pbBlackWhite.Name = "pbBlackWhite";
-            this.pbBlackWhite.Size = new System.Drawing.Size(770, 56);
-            this.pbBlackWhite.TabIndex = 0;
-            this.pbBlackWhite.TabStop = false;
+            this.pbDraft.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pbDraft.Location = new System.Drawing.Point(0, 0);
+            this.pbDraft.Name = "pbDraft";
+            this.pbDraft.Size = new System.Drawing.Size(770, 56);
+            this.pbDraft.TabIndex = 0;
+            this.pbDraft.TabStop = false;
             // 
             // splitPanelButtonAndLog
             // 
@@ -325,69 +327,88 @@ namespace CardRotager {
             this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuImage,
+            this.menuImage,
             this.MenuView,
             this.MenuForm,
-            this.localeToolStripMenuItem});
+            this.menuLanguage});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(2742, 33);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // MenuImage
+            // menuImage
             // 
-            this.MenuImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuImageOpenItem,
-            this.MenuImageCloseItem,
+            this.menuImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuImageOpenItem,
+            this.menuImageSaveDraftItem,
+            this.menuImageSaveItem,
+            this.menuImageCloseItem,
             this.toolStripMenuItem1,
-            this.MenuImageProcessItem,
+            this.menuImageProcessItem,
             this.toolStripMenuItem2,
-            this.MenuImageExitItem});
-            this.MenuImage.Name = "MenuImage";
-            this.MenuImage.Size = new System.Drawing.Size(141, 32);
-            this.MenuImage.Text = "&Изображение";
+            this.menuImageExitItem});
+            this.menuImage.Name = "menuImage";
+            this.menuImage.Size = new System.Drawing.Size(141, 29);
+            this.menuImage.Text = "&Изображение";
             // 
-            // MenuImageOpenItem
+            // menuImageOpenItem
             // 
-            this.MenuImageOpenItem.Name = "MenuImageOpenItem";
-            this.MenuImageOpenItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.MenuImageOpenItem.Size = new System.Drawing.Size(270, 34);
-            this.MenuImageOpenItem.Text = "&Открыть...";
-            this.MenuImageOpenItem.Click += new System.EventHandler(this.menuImageOpenItem_Click);
+            this.menuImageOpenItem.Name = "menuImageOpenItem";
+            this.menuImageOpenItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.menuImageOpenItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageOpenItem.Text = "&Открыть...";
+            this.menuImageOpenItem.Click += new System.EventHandler(this.menuImageOpenItem_Click);
             // 
-            // MenuImageCloseItem
+            // menuImageSaveDraftItem
             // 
-            this.MenuImageCloseItem.Name = "MenuImageCloseItem";
-            this.MenuImageCloseItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.MenuImageCloseItem.Size = new System.Drawing.Size(270, 34);
-            this.MenuImageCloseItem.Text = "Закрыть";
-            this.MenuImageCloseItem.Click += new System.EventHandler(this.menuImageCloseItem_Click);
+            this.menuImageSaveDraftItem.Name = "menuImageSaveDraftItem";
+            this.menuImageSaveDraftItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
+            | System.Windows.Forms.Keys.S)));
+            this.menuImageSaveDraftItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageSaveDraftItem.Text = "&Сохранить черновик...";
+            this.menuImageSaveDraftItem.Click += new System.EventHandler(this.menuImageSaveDraftItem_Click);
+            // 
+            // menuImageSaveItem
+            // 
+            this.menuImageSaveItem.Name = "menuImageSaveItem";
+            this.menuImageSaveItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.menuImageSaveItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageSaveItem.Text = "&Сохранить результат...";
+            this.menuImageSaveItem.Click += new System.EventHandler(this.menuImageSaveItem_Click);
+            // 
+            // menuImageCloseItem
+            // 
+            this.menuImageCloseItem.Name = "menuImageCloseItem";
+            this.menuImageCloseItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.menuImageCloseItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageCloseItem.Text = "Закрыть";
+            this.menuImageCloseItem.Click += new System.EventHandler(this.menuImageCloseItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(267, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(389, 6);
             // 
-            // MenuImageProcessItem
+            // menuImageProcessItem
             // 
-            this.MenuImageProcessItem.Name = "MenuImageProcessItem";
-            this.MenuImageProcessItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MenuImageProcessItem.Size = new System.Drawing.Size(270, 34);
-            this.MenuImageProcessItem.Text = "Обр&аботка";
-            this.MenuImageProcessItem.Click += new System.EventHandler(this.menuImageProcessItem_Click);
+            this.menuImageProcessItem.Name = "menuImageProcessItem";
+            this.menuImageProcessItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.menuImageProcessItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageProcessItem.Text = "Обр&аботка";
+            this.menuImageProcessItem.Click += new System.EventHandler(this.menuImageProcessItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(267, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(389, 6);
             // 
-            // MenuImageExitItem
+            // menuImageExitItem
             // 
-            this.MenuImageExitItem.Name = "MenuImageExitItem";
-            this.MenuImageExitItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.X)));
-            this.MenuImageExitItem.Size = new System.Drawing.Size(270, 34);
-            this.MenuImageExitItem.Text = "В&ыход";
+            this.menuImageExitItem.Name = "menuImageExitItem";
+            this.menuImageExitItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.X)));
+            this.menuImageExitItem.Size = new System.Drawing.Size(392, 34);
+            this.menuImageExitItem.Text = "В&ыход";
             // 
             // MenuView
             // 
@@ -397,14 +418,14 @@ namespace CardRotager {
             this.toolStripMenuItem3,
             this.MenuView10PercentItem});
             this.MenuView.Name = "MenuView";
-            this.MenuView.Size = new System.Drawing.Size(58, 32);
+            this.MenuView.Size = new System.Drawing.Size(58, 29);
             this.MenuView.Text = "&Вид";
             // 
             // MenuViewFitItem
             // 
             this.MenuViewFitItem.Name = "MenuViewFitItem";
             this.MenuViewFitItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.MenuViewFitItem.Size = new System.Drawing.Size(270, 34);
+            this.MenuViewFitItem.Size = new System.Drawing.Size(230, 34);
             this.MenuViewFitItem.Text = "&Заполнить";
             this.MenuViewFitItem.Click += new System.EventHandler(this.fitToolStripMenuItem_Click);
             // 
@@ -412,20 +433,20 @@ namespace CardRotager {
             // 
             this.MenuViewScrollItem.Name = "MenuViewScrollItem";
             this.MenuViewScrollItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.MenuViewScrollItem.Size = new System.Drawing.Size(270, 34);
+            this.MenuViewScrollItem.Size = new System.Drawing.Size(230, 34);
             this.MenuViewScrollItem.Text = "Как есть";
             this.MenuViewScrollItem.Click += new System.EventHandler(this.scrollToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(267, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(227, 6);
             // 
             // MenuView10PercentItem
             // 
             this.MenuView10PercentItem.Name = "MenuView10PercentItem";
             this.MenuView10PercentItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.MenuView10PercentItem.Size = new System.Drawing.Size(270, 34);
+            this.MenuView10PercentItem.Size = new System.Drawing.Size(230, 34);
             this.MenuView10PercentItem.Text = "10%";
             this.MenuView10PercentItem.Click += new System.EventHandler(this.menuItem10Percent_Click);
             // 
@@ -436,7 +457,7 @@ namespace CardRotager {
             this.form2ToolStripMenuItem1,
             this.saveTextForTranslateToolStripMenuItem});
             this.MenuForm.Name = "MenuForm";
-            this.MenuForm.Size = new System.Drawing.Size(89, 32);
+            this.MenuForm.Size = new System.Drawing.Size(89, 29);
             this.MenuForm.Text = "Формы";
             // 
             // конверторToolStripMenuItem
@@ -453,45 +474,75 @@ namespace CardRotager {
             this.form2ToolStripMenuItem1.Text = "Form2";
             this.form2ToolStripMenuItem1.Click += new System.EventHandler(this.form2ToolStripMenuItem1_Click);
             // 
+            // saveTextForTranslateToolStripMenuItem
+            // 
+            this.saveTextForTranslateToolStripMenuItem.Name = "saveTextForTranslateToolStripMenuItem";
+            this.saveTextForTranslateToolStripMenuItem.Size = new System.Drawing.Size(285, 34);
+            this.saveTextForTranslateToolStripMenuItem.Text = "Save text for translate";
+            this.saveTextForTranslateToolStripMenuItem.Click += new System.EventHandler(this.saveTextForTranslateToolStripMenuItem_Click);
+            // 
+            // menuLanguage
+            // 
+            this.menuLanguage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.englishToolStripMenuItem,
+            this.russianToolStripMenuItem});
+            this.menuLanguage.Name = "menuLanguage";
+            this.menuLanguage.Size = new System.Drawing.Size(161, 29);
+            this.menuLanguage.Text = "Язык (Language)";
+            // 
+            // englishToolStripMenuItem
+            // 
+            this.englishToolStripMenuItem.Name = "englishToolStripMenuItem";
+            this.englishToolStripMenuItem.Size = new System.Drawing.Size(280, 34);
+            this.englishToolStripMenuItem.Text = "Английский (English)";
+            this.englishToolStripMenuItem.Click += new System.EventHandler(this.englishToolStripMenuItem_Click);
+            // 
+            // russianToolStripMenuItem
+            // 
+            this.russianToolStripMenuItem.Name = "russianToolStripMenuItem";
+            this.russianToolStripMenuItem.Size = new System.Drawing.Size(280, 34);
+            this.russianToolStripMenuItem.Text = "Русский (Russian)";
+            this.russianToolStripMenuItem.Click += new System.EventHandler(this.russianToolStripMenuItem_Click);
+            // 
             // toolStrip1
             // 
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(60, 60);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuImageOpenButton,
-            this.MenuImageSaveButton,
+            this.menuImageOpenButton,
+            this.menuImageSaveButton,
             this.printToolStripButton,
             this.toolStripSeparator,
-            this.copyToolStripButton,
-            this.pasteToolStripButton,
+            this.menuCopyButton,
+            this.menuPasteButton,
             this.toolStripSeparator1,
-            this.ButtonScale10percent,
-            this.MenuProcessButton});
+            this.menuScale10PercentButton,
+            this.menuProcessButton});
             this.toolStrip1.Location = new System.Drawing.Point(4, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(580, 69);
+            this.toolStrip1.Size = new System.Drawing.Size(516, 69);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // MenuImageOpenButton
+            // menuImageOpenButton
             // 
-            this.MenuImageOpenButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.MenuImageOpenButton.Image = ((System.Drawing.Image)(resources.GetObject("MenuImageOpenButton.Image")));
-            this.MenuImageOpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.MenuImageOpenButton.Name = "MenuImageOpenButton";
-            this.MenuImageOpenButton.Size = new System.Drawing.Size(64, 64);
-            this.MenuImageOpenButton.Text = "&Открыть";
-            this.MenuImageOpenButton.Click += new System.EventHandler(this.menuImageOpen_Click);
+            this.menuImageOpenButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.menuImageOpenButton.Image = ((System.Drawing.Image)(resources.GetObject("menuImageOpenButton.Image")));
+            this.menuImageOpenButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuImageOpenButton.Name = "menuImageOpenButton";
+            this.menuImageOpenButton.Size = new System.Drawing.Size(64, 64);
+            this.menuImageOpenButton.Text = "&Открыть";
+            this.menuImageOpenButton.Click += new System.EventHandler(this.menuImageOpen_Click);
             // 
-            // MenuImageSaveButton
+            // menuImageSaveButton
             // 
-            this.MenuImageSaveButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.MenuImageSaveButton.Image = ((System.Drawing.Image)(resources.GetObject("MenuImageSaveButton.Image")));
-            this.MenuImageSaveButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.MenuImageSaveButton.Name = "MenuImageSaveButton";
-            this.MenuImageSaveButton.Size = new System.Drawing.Size(64, 64);
-            this.MenuImageSaveButton.Text = "&Save";
-            this.MenuImageSaveButton.Click += new System.EventHandler(this.btSave_Click);
+            this.menuImageSaveButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.menuImageSaveButton.Image = ((System.Drawing.Image)(resources.GetObject("menuImageSaveButton.Image")));
+            this.menuImageSaveButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuImageSaveButton.Name = "menuImageSaveButton";
+            this.menuImageSaveButton.Size = new System.Drawing.Size(64, 64);
+            this.menuImageSaveButton.Text = "&Сохранить";
+            this.menuImageSaveButton.Click += new System.EventHandler(this.menuImageSaveItem_Click);
             // 
             // printToolStripButton
             // 
@@ -501,6 +552,7 @@ namespace CardRotager {
             this.printToolStripButton.Name = "printToolStripButton";
             this.printToolStripButton.Size = new System.Drawing.Size(64, 64);
             this.printToolStripButton.Text = "&Print";
+            this.printToolStripButton.Visible = false;
             this.printToolStripButton.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // toolStripSeparator
@@ -508,47 +560,49 @@ namespace CardRotager {
             this.toolStripSeparator.Name = "toolStripSeparator";
             this.toolStripSeparator.Size = new System.Drawing.Size(6, 69);
             // 
-            // copyToolStripButton
+            // menuCopyButton
             // 
-            this.copyToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.copyToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("copyToolStripButton.Image")));
-            this.copyToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.copyToolStripButton.Name = "copyToolStripButton";
-            this.copyToolStripButton.Size = new System.Drawing.Size(64, 64);
-            this.copyToolStripButton.Text = "&Copy";
+            this.menuCopyButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.menuCopyButton.Image = ((System.Drawing.Image)(resources.GetObject("menuCopyButton.Image")));
+            this.menuCopyButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuCopyButton.Name = "menuCopyButton";
+            this.menuCopyButton.Size = new System.Drawing.Size(64, 64);
+            this.menuCopyButton.Text = "&Copy";
+            this.menuCopyButton.Click += new System.EventHandler(this.copyToolStripButton_Click);
             // 
-            // pasteToolStripButton
+            // menuPasteButton
             // 
-            this.pasteToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.pasteToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("pasteToolStripButton.Image")));
-            this.pasteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.pasteToolStripButton.Name = "pasteToolStripButton";
-            this.pasteToolStripButton.Size = new System.Drawing.Size(64, 64);
-            this.pasteToolStripButton.Text = "&Paste";
+            this.menuPasteButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.menuPasteButton.Image = ((System.Drawing.Image)(resources.GetObject("menuPasteButton.Image")));
+            this.menuPasteButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuPasteButton.Name = "menuPasteButton";
+            this.menuPasteButton.Size = new System.Drawing.Size(64, 64);
+            this.menuPasteButton.Text = "&Paste";
+            this.menuPasteButton.Click += new System.EventHandler(this.menuPasteButton_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 69);
             // 
-            // ButtonScale10percent
+            // menuScale10PercentButton
             // 
-            this.ButtonScale10percent.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.ButtonScale10percent.Image = ((System.Drawing.Image)(resources.GetObject("ButtonScale10percent.Image")));
-            this.ButtonScale10percent.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.ButtonScale10percent.Name = "ButtonScale10percent";
-            this.ButtonScale10percent.Size = new System.Drawing.Size(64, 64);
-            this.ButtonScale10percent.Text = "Масштаб 10%";
-            this.ButtonScale10percent.Click += new System.EventHandler(this.menuItem10Percent_Click);
+            this.menuScale10PercentButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.menuScale10PercentButton.Image = ((System.Drawing.Image)(resources.GetObject("menuScale10PercentButton.Image")));
+            this.menuScale10PercentButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuScale10PercentButton.Name = "menuScale10PercentButton";
+            this.menuScale10PercentButton.Size = new System.Drawing.Size(64, 64);
+            this.menuScale10PercentButton.Text = "Масштаб 10%";
+            this.menuScale10PercentButton.Click += new System.EventHandler(this.menuItem10Percent_Click);
             // 
-            // MenuProcessButton
+            // menuProcessButton
             // 
-            this.MenuProcessButton.Image = ((System.Drawing.Image)(resources.GetObject("MenuProcessButton.Image")));
-            this.MenuProcessButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.MenuProcessButton.Name = "MenuProcessButton";
-            this.MenuProcessButton.Size = new System.Drawing.Size(166, 64);
-            this.MenuProcessButton.Text = "&Обработка";
-            this.MenuProcessButton.Click += new System.EventHandler(this.buttonProcess_Click);
+            this.menuProcessButton.Image = ((System.Drawing.Image)(resources.GetObject("menuProcessButton.Image")));
+            this.menuProcessButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.menuProcessButton.Name = "menuProcessButton";
+            this.menuProcessButton.Size = new System.Drawing.Size(166, 64);
+            this.menuProcessButton.Text = "&Обработка";
+            this.menuProcessButton.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // toolStripContainer1
             // 
@@ -567,36 +621,6 @@ namespace CardRotager {
             // toolStripContainer1.TopToolStripPanel
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
-            // 
-            // saveTextForTranslateToolStripMenuItem
-            // 
-            this.saveTextForTranslateToolStripMenuItem.Name = "saveTextForTranslateToolStripMenuItem";
-            this.saveTextForTranslateToolStripMenuItem.Size = new System.Drawing.Size(285, 34);
-            this.saveTextForTranslateToolStripMenuItem.Text = "Save text for translate";
-            this.saveTextForTranslateToolStripMenuItem.Click += new System.EventHandler(this.saveTextForTranslateToolStripMenuItem_Click);
-            // 
-            // localeToolStripMenuItem
-            // 
-            this.localeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.englishToolStripMenuItem,
-            this.russianToolStripMenuItem});
-            this.localeToolStripMenuItem.Name = "localeToolStripMenuItem";
-            this.localeToolStripMenuItem.Size = new System.Drawing.Size(105, 29);
-            this.localeToolStripMenuItem.Text = "Language";
-            // 
-            // englishToolStripMenuItem
-            // 
-            this.englishToolStripMenuItem.Name = "englishToolStripMenuItem";
-            this.englishToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.englishToolStripMenuItem.Text = "English";
-            this.englishToolStripMenuItem.Click += new System.EventHandler(this.englishToolStripMenuItem_Click);
-            // 
-            // russianToolStripMenuItem
-            // 
-            this.russianToolStripMenuItem.Name = "russianToolStripMenuItem";
-            this.russianToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.russianToolStripMenuItem.Text = "Russian";
-            this.russianToolStripMenuItem.Click += new System.EventHandler(this.russianToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -626,7 +650,7 @@ namespace CardRotager {
             ((System.ComponentModel.ISupportInitialize)(this.horSplitContainer)).EndInit();
             this.horSplitContainer.ResumeLayout(false);
             this.panelImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pbBlackWhite)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbDraft)).EndInit();
             this.splitPanelButtonAndLog.Panel1.ResumeLayout(false);
             this.splitPanelButtonAndLog.Panel1.PerformLayout();
             this.splitPanelButtonAndLog.Panel2.ResumeLayout(false);
@@ -658,19 +682,19 @@ namespace CardRotager {
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.SplitContainer splitPanelButtonAndLog;
         private System.Windows.Forms.TextBox tbLog;
-        public System.Windows.Forms.PictureBox pbBlackWhite;
+        public System.Windows.Forms.PictureBox pbDraft;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton MenuProcessButton;
-        private System.Windows.Forms.ToolStripButton MenuImageOpenButton;
-        private System.Windows.Forms.ToolStripButton MenuImageSaveButton;
+        private System.Windows.Forms.ToolStripButton menuProcessButton;
+        private System.Windows.Forms.ToolStripButton menuImageOpenButton;
+        private System.Windows.Forms.ToolStripButton menuImageSaveButton;
         private System.Windows.Forms.ToolStripButton printToolStripButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
-        private System.Windows.Forms.ToolStripButton copyToolStripButton;
-        private System.Windows.Forms.ToolStripButton pasteToolStripButton;
+        private System.Windows.Forms.ToolStripButton menuCopyButton;
+        private System.Windows.Forms.ToolStripButton menuPasteButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton ButtonScale10percent;
+        private System.Windows.Forms.ToolStripButton menuScale10PercentButton;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
-        private System.Windows.Forms.ToolStripMenuItem MenuImage;
+        private System.Windows.Forms.ToolStripMenuItem menuImage;
         private System.Windows.Forms.ToolStripMenuItem MenuView;
         private System.Windows.Forms.ToolStripMenuItem MenuView10PercentItem;
         private System.Windows.Forms.ToolStripMenuItem MenuForm;
@@ -683,20 +707,22 @@ namespace CardRotager {
         private System.Windows.Forms.SplitContainer splitContainerImage;
         private System.Windows.Forms.Label lbHintImageOpen;
         private System.Windows.Forms.Label lbHintImageProcess;
-        private System.Windows.Forms.ToolStripMenuItem MenuImageOpenItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageOpenItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem MenuImageExitItem;
-        private System.Windows.Forms.ToolStripMenuItem MenuImageProcessItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageExitItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageProcessItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem MenuImageCloseItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageCloseItem;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ToolStripMenuItem saveTextForTranslateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem localeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuLanguage;
         private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageSaveItem;
+        private System.Windows.Forms.ToolStripMenuItem menuImageSaveDraftItem;
     }
 }
 

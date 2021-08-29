@@ -19,6 +19,15 @@ namespace CardRotager {
             this.angle = angle;
         }
 
+        public Edge(Edge edge) {
+            x = edge.X;
+            x2 = edge.X2;
+            y = edge.Y;
+            y2 = edge.Y2;
+            terminate = edge.Terminate;
+            angle = edge.Angle;
+        }
+
         public int X { get => x; set => x = value; }
         public int Y { get => y; set => y = value; }
         public int X2 { get => x2; set => x2 = value; }
@@ -34,9 +43,9 @@ namespace CardRotager {
         }
 
         public double triangleLentgh() {
-            if(Height == 0) {
+            if (Height == 0) {
                 return Width;
-            } else if(Width == 0) {
+            } else if (Width == 0) {
                 return Height;
             }
             return Math.Sqrt(Math.Pow(X2 - X, 2) + Math.Pow(Y2 - Y, 2));

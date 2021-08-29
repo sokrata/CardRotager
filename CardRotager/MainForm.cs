@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -31,7 +32,7 @@ namespace CardRotager {
             imageProcess = null;
             localize = new Localize();
 
-            pbBlackWhite.MouseWheel += pictureBox_MouseWheel;
+            pbDraft.MouseWheel += pictureBox_MouseWheel;
             pbOriginal.MouseWheel += pictureBox_MouseWheel;
             pbTarget.MouseWheel += pictureBox_MouseWheel;
         }
@@ -55,29 +56,34 @@ namespace CardRotager {
             localize.localizeControl(this);
             localize.localizeControl(tabPageBW);
             localize.localizeControl(tabPageImage);
-            localize.localizeControl(MenuImage);
-            localize.localizeControl(MenuImage);
-            localize.localizeControl(MenuImageOpenItem);
-            localize.localizeControl(MenuImageCloseItem);
-            localize.localizeControl(MenuImageExitItem);
-            localize.localizeControl(MenuImageOpenButton);
-            localize.localizeControl(MenuImageProcessItem);
-            localize.localizeControl(MenuImageSaveButton);
+            
+            localize.localizeControl(menuImage);
+            localize.localizeControl(menuImageOpenItem);
+            localize.localizeControl(menuImageSaveItem);
+            localize.localizeControl(menuImageSaveDraftItem);
+            localize.localizeControl(menuImageCloseItem);
+            localize.localizeControl(menuImageProcessItem);
+            localize.localizeControl(menuImageExitItem);
+
             localize.localizeControl(MenuView);
             localize.localizeControl(MenuView10PercentItem);
             localize.localizeControl(MenuViewFitItem);
             localize.localizeControl(MenuViewScrollItem);
-            localize.localizeControl(MenuProcessButton);
+            
+            localize.localizeControl(menuImageOpenButton);
+            localize.localizeControl(menuImageSaveButton);
+            localize.localizeControl(menuProcessButton);
+
             localize.localizeControl(label1);
         }
 
         private void processImage() {
             StringBuilder sb = new StringBuilder();
             ImageProcessor ip = new ImageProcessor(localize);
-            Bitmap bitmap = ((Bitmap)pbBlackWhite.Image);
+            Bitmap bitmap = ((Bitmap)pbDraft.Image);
             pbTarget.Image = null;
 
-            ip.prepareData(sb, bitmap, out List<Line> dotLines, out int[] showDots);
+            ip.prepareData(sb, bitmap, out List<Line> dashLines,out List<Edge> angleEdge, out int[] showDots);
 
             int width = bitmap.Width;
             int height = bitmap.Height;
@@ -85,20 +91,21 @@ namespace CardRotager {
                 drawler.DrawDots(graphics, Pens.Red, 2, showDots, true);
 
                 float[] dashValues = { 5, 2, 15, 4 };
-                Pen blackPen = new Pen(Color.Red, 5) {
+                Pen redDashPen = new Pen(Color.Red, 5) {
                     DashPattern = dashValues
                 };
 
-                foreach (var item in dotLines) {
+                sb.AppendLine(l("Рисование линий-границ поиска горизонтальных линий ниже верхних:"));
+                foreach (var item in dashLines) {
                     sb.AppendFormat("{0}\r\n", item);
-                    graphics.DrawLine(blackPen, item.X, item.Y1, item.X2, item.Y2);
+                    graphics.DrawLine(redDashPen, item.X, item.Y1, item.X2, item.Y2);
                 }
 
-                sb?.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
+                sb.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
                 ip.HLinesAll.Sort((x, y) => x.Y.CompareTo(y.Y));
                 drawler.DrawLines(graphics, ip.HLinesAll, Pens.Cyan, sb, true, ImageProcessor.THICK);
 
-                sb?.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
+                sb.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
                 ip.VLinesAll.Sort((line1, line2) => {
                     if (LinesDetectorBase.inRange(line1.Y, line2.Y, 100)) {
                         return line1.X.CompareTo(line2.X);
@@ -106,6 +113,13 @@ namespace CardRotager {
                     return line1.Y.CompareTo(line2.Y);
                 });
                 drawler.DrawLines(graphics, ip.VLinesAll, Pens.Blue, sb, true, ImageProcessor.THICK);
+
+                sb.AppendLine(l("Рисование линий, по которым расчитывается угол наклона карт"));
+                Pen anglePen = new Pen(Color.Lime, 12);
+                foreach (var item in angleEdge) {
+                    sb.AppendFormat("{0}\r\n", item);
+                    graphics.DrawLine(anglePen, item.X, item.Y, item.X2, item.Y2);
+                }
 
                 rectangles = makeRect(sb, ip.HLinesAll, ip.VLinesAll, out List<float> angles);
 
@@ -150,9 +164,30 @@ namespace CardRotager {
         }
 
         public static void copyRegionIntoImage(Graphics toGraphic, Rectangle toRegion, Bitmap fromBitmap, Rectangle fromRegion, float angle, int extend) {
+            //увеличим на запас (защита от скоса сторон картинки)
             fromRegion.Inflate(new Size(extend, extend));
             int addX = (toRegion.Width - fromRegion.Width) / 2;
             int addY = (toRegion.Height - fromRegion.Height) / 2;
+            if (angle != 0) {
+                using (Bitmap rotatedBitmap = createEmtpyBitmapSource(fromRegion.Width, fromRegion.Height, fromBitmap)) {
+                    using (Graphics rotatedGraphic = Graphics.FromImage(rotatedBitmap)) {
+                        rotatedGraphic.Clear(Color.White);
+                        float centerX = (fromRegion.Left + fromRegion.Right) * 0.5f;
+                        float centerY = (fromRegion.Top + fromRegion.Bottom) * 0.5f;
+                        rotatedGraphic.TranslateTransform(centerX, centerY);
+                        rotatedGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        rotatedGraphic.RotateTransform(angle);
+                        rotatedGraphic.TranslateTransform(-centerX, -centerY);
+                        float scale = (float)rotatedBitmap.Width / rotatedBitmap.Width;
+                        rotatedGraphic.ScaleTransform(scale, scale);
+
+                        rotatedGraphic.DrawImage(fromBitmap, new Rectangle(0, 0, rotatedBitmap.Width, rotatedBitmap.Height), fromRegion, GraphicsUnit.Pixel);
+                    }
+                    Rectangle srcRect = new Rectangle(0, 0, rotatedBitmap.Width, rotatedBitmap.Height);
+                    toGraphic.DrawImage(rotatedBitmap, toRegion.X + addX, toRegion.Y + addY, srcRect, GraphicsUnit.Pixel);
+                }
+                return;
+            }
 
             toGraphic.DrawImage(fromBitmap, toRegion.X + addX, toRegion.Y + addY, fromRegion, GraphicsUnit.Pixel);
         }
@@ -202,14 +237,14 @@ namespace CardRotager {
                 }
 
                 //bitmap = ToGray(bitmap);
-                pbBlackWhite.Image = bitmap;
-                pbBlackWhite.Width = bitmap.Width;
-                pbBlackWhite.Height = bitmap.Height;
+                pbDraft.Image = bitmap;
+                pbDraft.Width = bitmap.Width;
+                pbDraft.Height = bitmap.Height;
                 bitmap = null;
 
                 pbOriginal.SizeMode = PictureBoxSizeMode.AutoSize;
                 pbTarget.SizeMode = PictureBoxSizeMode.AutoSize;
-                pbBlackWhite.SizeMode = PictureBoxSizeMode.AutoSize;
+                pbDraft.SizeMode = PictureBoxSizeMode.AutoSize;
 
 
                 //graphics = Graphics.FromImage(bitmap);
@@ -271,15 +306,8 @@ namespace CardRotager {
             Application.DoEvents();
         }
 
-        private void btSave_Click(object sender, EventArgs e) {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
-                pbBlackWhite.Image.Save(saveFileDialog.FileName);
-            }
-        }
-
         private void fitToolStripMenuItem_Click(object sender, EventArgs e) {
-            switchInZoomMode(pbBlackWhite);
+            switchInZoomMode(pbDraft);
             switchInZoomMode(pbOriginal);
             switchInZoomMode(pbTarget);
         }
@@ -290,7 +318,7 @@ namespace CardRotager {
         }
 
         private void scrollToolStripMenuItem_Click(object sender, EventArgs e) {
-            switchInScrollMode(pbBlackWhite);
+            switchInScrollMode(pbDraft);
             switchInScrollMode(pbOriginal);
             switchInScrollMode(pbTarget);
         }
@@ -301,10 +329,10 @@ namespace CardRotager {
         }
 
         private void menuItem10Percent_Click(object sender, EventArgs e) {
-            if (pbBlackWhite == null || pbBlackWhite.Image == null) {
+            if (pbDraft == null || pbDraft.Image == null) {
                 return;
             }
-            zoomPictureBox(panelImage, pbBlackWhite, label1, 0, 0, 0, true, 0, false);
+            zoomPictureBox(panelImage, pbDraft, label1, 0, 0, 0, true, 0, false);
             zoomPictureBox(panelOriginal, pbOriginal, label1, 0, 0, 0, true, 0, false);
             zoomPictureBox(panelOriginal, pbTarget, label1, 0, 0, 0, true, 0, false);
         }
@@ -406,19 +434,19 @@ namespace CardRotager {
         }
 
         private void cbSelectIgnoreColor_Click(object sender, EventArgs e) {
-            pbBlackWhite.Cursor = Cursors.Cross;
+            pbDraft.Cursor = Cursors.Cross;
         }
 
         private void lbHintFileOpen_Click(object sender, EventArgs e) {
-            MenuImageOpenButton.PerformClick();
+            menuImageOpenButton.PerformClick();
         }
 
         private void lbHintProcess_Click(object sender, EventArgs e) {
-            MenuImageProcessItem.PerformClick();
+            menuImageProcessItem.PerformClick();
         }
 
         private void menuImageCloseItem_Click(object sender, EventArgs e) {
-            pbBlackWhite.Image = null;
+            pbDraft.Image = null;
             pbOriginal.Image = null;
             pbTarget.Image = null;
             imageProcess = true;
@@ -430,7 +458,7 @@ namespace CardRotager {
         private void menuImageOpenItem_Click(object sender, EventArgs e) {
             lbHintImageOpen.Visible = false;
             pbTarget.Image = null;
-            pbBlackWhite.Image = null;
+            pbDraft.Image = null;
             lbHintImageProcess.Visible = false;
         }
 
@@ -453,6 +481,56 @@ namespace CardRotager {
             localizeControl();
             localize.revert(false);
             localize.resetLoadTranslate();
+        }
+
+        private void menuImageSaveItem_Click(object sender, EventArgs e) {
+            if (imageProcess != true || pbTarget.Image == null) {
+                MessageBox.Show(l("Невозможно скопировать обработанный файл. Необходимо открыть и обработать файл с изображением."),l("Сохранение обработанного файла изображения"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = l("Графический файл (*.bmp)|*.bmp");
+            if (fileName != null) {
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
+                saveFileDialog.FileName = Path.ChangeExtension(Path.GetFileName(fileName), ".bmp");
+            }
+            if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
+                pbTarget.Image.Save(saveFileDialog.FileName);
+            }
+        }
+
+        private void copyToolStripButton_Click(object sender, EventArgs e) {
+            if (imageProcess != true || pbTarget.Image == null) {
+                return;
+            }
+            Clipboard.SetImage(pbTarget.Image);
+        }
+
+        private void menuPasteButton_Click(object sender, EventArgs e) {
+            if (imageProcess != true || !Clipboard.ContainsImage()) {
+                return;
+            }
+            pbOriginal.Image = Clipboard.GetImage();
+            imageProcess = false;
+            fileName = null;
+            pbDraft.Image = null;
+            pbTarget.Image = null;
+        }
+
+        private void menuImageSaveDraftItem_Click(object sender, EventArgs e) {
+            if (imageProcess != true || pbDraft.Image == null) {
+                MessageBox.Show(l("Невозможно скопировать черновой файл. Необходимо открыть и обработать файл с изображением."), l("Сохранение чернового файла изображения"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = l("Графический файл (*.bmp)|*.bmp");
+            if (fileName != null) {
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
+                saveFileDialog.FileName = Path.ChangeExtension(Path.GetFileName(fileName), ".draft.bmp");
+            }
+            if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
+                pbDraft.Image.Save(saveFileDialog.FileName);
+            }
         }
     }
 

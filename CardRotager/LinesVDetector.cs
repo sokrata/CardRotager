@@ -74,8 +74,9 @@ namespace CardRotager {
             }
         }
 
-        public static List<Edge> createVLine(int[] dots, StringBuilder sb, int killLength, int startY, int height, bool debug = false) {
+        public static List<Edge> createVLine(int[] dots, StringBuilder sb, int killLength, int startY, int height, out List<Edge> angleLines2, bool debug = false) {
             List<Edge> lines = new List<Edge>();
+            angleLines2 = new List<Edge>();
             makeVLine(ref dots, startY, height, out lines, out int checkRadiusX);
 
             //удалим короткие линии
@@ -158,6 +159,7 @@ namespace CardRotager {
 
                     Edge longEdge = lines[longestIndex];
                     longEdge.calcAngle(false);
+                    angleLines2.Add(new Edge(longEdge));
 
                     //поиск влево до прерывателя (terminate) или начала
                     int curIndex = longestIndex - 1;

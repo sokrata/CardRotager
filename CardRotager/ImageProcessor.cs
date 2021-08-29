@@ -41,16 +41,17 @@ namespace CardRotager {
         /// </summary>
         /// <param name="sb"></param>
         /// <param name="bitmap"></param>
-        /// <param name="dotLines"></param>
+        /// <param name="dashLines"></param>
         /// <param name="showDots"></param>
-        public void prepareData(StringBuilder sb, Bitmap bitmap, out List<Line> dotLines, out int[] showDots) {
+        public void prepareData(StringBuilder sb, Bitmap bitmap, out List<Line> dashLines, out List<Edge> angleEdges, out int[] showDots) {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             int width = bitmap.Width;
             int height = bitmap.Height;
 
-            dotLines = new List<Line>();
+            dashLines = new List<Line>();
+            angleEdges = new List<Edge>();
             showDots = null;
 
             using (UnmanagedImage unmandImage = LinesDetectorBase.prepareBitmap(bitmap, out BitmapData imageData)) {
@@ -65,7 +66,8 @@ namespace CardRotager {
                     sb?.AppendFormat(l("\r\n== Определение вертикальных линий (с мин. длиной: {0}) ==\r\n"), KillLength);
 
                     for (int colIndex = colCount - 1; colIndex >= 0; colIndex--) {
-                        List<Edge> vLines = processColumLines(unmandImage, colIndex, colCount, width, height, sb);
+                        List<Edge> vLines = processColumLines(unmandImage, colIndex, colCount, width, height, sb, out List<Edge> angleLines2);
+                        angleEdges.AddRange(angleLines2);
                         VLinesAll.AddRange(vLines);
                     }
 
@@ -83,8 +85,8 @@ namespace CardRotager {
                         getRangeY(height, vLineRows, rowIndex, out int minY, out int maxY);
 
                         //линии верхняя и нижняя для отображения позже на форме
-                        dotLines.Add(new Line(0, minY, width, minY));
-                        dotLines.Add(new Line(0, maxY, width, maxY));
+                        dashLines.Add(new Line(0, minY, width, minY));
+                        dashLines.Add(new Line(0, maxY, width, maxY));
 
                         //для текущей строки формируем строку точек ниже minY но выше maxY
                         showDots = LinesHDetector.findHDots(unmandImage, width, height, minY, maxY);
@@ -176,11 +178,11 @@ namespace CardRotager {
         /// <param name="sb"></param>
         /// 
         /// <returns></returns>
-        private List<Edge> processColumLines(UnmanagedImage unmandImage, int colIndex, int colCount, int width, int height, StringBuilder sb) {
+        private List<Edge> processColumLines(UnmanagedImage unmandImage, int colIndex, int colCount, int width, int height, StringBuilder sb, out List<Edge> angleLines2) {
             getRangeX(colIndex, colCount, width, out int minX, out int maxX);
 
             int[] dotsVert = LinesVDetector.fillVDotsAll(minX, maxX, height, unmandImage);
-            List<Edge> vLines = LinesVDetector.createVLine(dotsVert, sb, KillLength, 0, height);
+            List<Edge> vLines = LinesVDetector.createVLine(dotsVert, sb, KillLength, 0, height, out angleLines2);
             for (int lineIndex = vLines.Count - 1; lineIndex >= 0; lineIndex--) {
                 if (vLines[lineIndex].Height < MIN_LINE_SIZE) {
                     vLines.RemoveAt(lineIndex);

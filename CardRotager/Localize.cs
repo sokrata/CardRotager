@@ -14,15 +14,23 @@ namespace CardRotager {
         private readonly Dictionary<string, string> dictTranslate;
 
         private bool reverseTranslate;
+
+        private static string lng = null;
         public Localize() {
             dictTranslate = new Dictionary<string, string>();
         }
 
         public String localize(String text) {
-            return getTranslate(text);            
+            return getTranslate(text);
         }
 
         private String getTranslate(string text) {
+            if (lng == "ru-RU") {
+                if (!dictTranslate.ContainsKey(text)) {
+                    dictTranslate.Add(text, null);
+                }
+                return text;
+            }
             if (reverseTranslate) {
                 if (dictTranslate.ContainsValue(text)) {
                     string key = dictTranslate.FirstOrDefault(x => x.Value == text).Key;
@@ -69,7 +77,7 @@ namespace CardRotager {
                 sb.AppendLine();
             }
             SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Text file with original text (*.lng)|*.lng";
+            dialog.Filter = "Text file with text for translate (*.lng)|*.lng";
             dialog.InitialDirectory = getCurrentTranslateFilePath();
             dialog.FileName = getCurrentTranslateFileName();
             if (dialog.ShowDialog() == DialogResult.OK) {
@@ -153,7 +161,6 @@ namespace CardRotager {
             return Application.StartupPath;
         }
 
-        private static string lng = null;
         public static string Language {
             get {
                 if (lng == null) {
