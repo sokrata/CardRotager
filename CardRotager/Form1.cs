@@ -82,8 +82,10 @@ namespace CardRotager {
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
             FileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.InitialDirectory = fileName == null ? null : Path.GetDirectoryName(fileName);
-            saveFileDialog.FileName = Path.ChangeExtension(fileName, ".png");
+            if (fileName != null) {
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
+                saveFileDialog.FileName = Path.ChangeExtension(fileName, ".png");
+            }
             if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
                 fileName = saveFileDialog.FileName;
                 saveToNonIndexedImageFormat(filteredPicture.Image, fileName);

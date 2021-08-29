@@ -35,17 +35,19 @@ namespace CardRotager {
             pbDraft.MouseWheel += pictureBox_MouseWheel;
             pbOriginal.MouseWheel += pictureBox_MouseWheel;
             pbTarget.MouseWheel += pictureBox_MouseWheel;
+            
+            drawler = new Drawler();
         }
 
         private void form1_Load(object sender, EventArgs e) {
             localizeControl();
             //fileName = @"C:\Users\sokra\OneDrive\Рабочий стол\www\17 + 18.Оборот.jpg";
-            if (Directory.Exists("S:\\2021-08-21\\Дилеммы короля\\конверты")) {
-                fileName = @"S:\2021-08-21\Дилеммы короля\конверты\17+18. Оборот.jpg";
-            }
-            if (Directory.Exists(@"E:\YandexDisk\Файлы\C# Sources\CardRotager")) {
-                fileName = @"E:\YandexDisk\Файлы\C# Sources\CardRotager\17+18. Оборот.jpg";
-            }
+            //if (Directory.Exists("S:\\2021-08-21\\Дилеммы короля\\конверты")) {
+            //    fileName = @"S:\2021-08-21\Дилеммы короля\конверты\17+18. Оборот.jpg";
+            //}
+            //if (Directory.Exists(@"E:\YandexDisk\Файлы\C# Sources\CardRotager")) {
+            //    fileName = @"E:\YandexDisk\Файлы\C# Sources\CardRotager\17+18. Оборот.jpg";
+            //}
             //fileName = @"C:\Users\sokra\OneDrive\Рабочий стол\www\17+18. Оборот.jpg";
         }
 
@@ -198,6 +200,7 @@ namespace CardRotager {
                         float centerY = (fromRegion.Top + fromRegion.Bottom) * 0.5f;
                         rotatedGraphic.TranslateTransform(centerX, centerY);
                         rotatedGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        //rotatedGraphic.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                         rotatedGraphic.RotateTransform(angle);
                         rotatedGraphic.TranslateTransform(-centerX, -centerY);
                         float scale = (float)rotatedBitmap.Width / rotatedBitmap.Width;
@@ -238,40 +241,10 @@ namespace CardRotager {
         private void openFile(string fileName) {
             try {
                 this.fileName = fileName;
-
-                Bitmap bitmap;
-
+                
                 System.Drawing.Image initImage = System.Drawing.Image.FromFile(fileName);
-                pbOriginal.Image = initImage;
-                using (Bitmap image = new Bitmap(initImage)) {
-                    int thresholdValue = 227;
-                    IFilter threshold = new Threshold(thresholdValue);
-                    using (Bitmap image2 = Grayscale.CommonAlgorithms.RMY.Apply(image)) {
-                        using (Bitmap bitmap1 = threshold.Apply(image2)) {
+                readImage(initImage);
 
-                            //using(var bitmap1 = image3) {
-                            MemoryStream ms = new MemoryStream();
-                            bitmap1.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                            var streamBitmap = System.Drawing.Image.FromStream(ms);
-                            bitmap = new Bitmap(streamBitmap);
-                        }
-                    }
-                }
-
-                //bitmap = ToGray(bitmap);
-                pbDraft.Image = bitmap;
-                pbDraft.Width = bitmap.Width;
-                pbDraft.Height = bitmap.Height;
-                bitmap = null;
-
-                pbOriginal.SizeMode = PictureBoxSizeMode.AutoSize;
-                pbTarget.SizeMode = PictureBoxSizeMode.AutoSize;
-                pbDraft.SizeMode = PictureBoxSizeMode.AutoSize;
-
-
-                //graphics = Graphics.FromImage(bitmap);
-                drawler = new Drawler();
-                //graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 //tbLog.Text = string.Format("w = {0}, h = {1}, w,h = {2}, {3}; res X,Y = {4}, {5}", bitmap.Width, bitmap.Height, imageBlackWhite.Width, imageBlackWhite.Height, this.bitmap.HorizontalResolution, this.bitmap.VerticalResolution);
 
                 Text = fileName;
@@ -281,6 +254,34 @@ namespace CardRotager {
             WinSpecific.clearMemory();
         }
 
+        private void readImage(System.Drawing.Image initImage) {
+            Bitmap bitmap;
+            pbOriginal.Image = initImage;
+            using (Bitmap image = new Bitmap(initImage)) {
+                int thresholdValue = 227;
+                IFilter threshold = new Threshold(thresholdValue);
+                using (Bitmap image2 = Grayscale.CommonAlgorithms.RMY.Apply(image)) {
+                    using (Bitmap bitmap1 = threshold.Apply(image2)) {
+
+                        //using(var bitmap1 = image3) {
+                        MemoryStream ms = new MemoryStream();
+                        bitmap1.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        var streamBitmap = System.Drawing.Image.FromStream(ms);
+                        bitmap = new Bitmap(streamBitmap);
+                    }
+                }
+            }
+
+            pbDraft.Image = bitmap;
+            pbDraft.Width = bitmap.Width;
+            pbDraft.Height = bitmap.Height;
+            pbTarget.Image = null;
+
+            pbOriginal.SizeMode = PictureBoxSizeMode.AutoSize;
+            pbTarget.SizeMode = PictureBoxSizeMode.AutoSize;
+            pbDraft.SizeMode = PictureBoxSizeMode.AutoSize;
+        }
+
         private void buttonProcess_Click(object sender, EventArgs e) {
             workFlowImageProcessExecute();
         }
@@ -288,6 +289,12 @@ namespace CardRotager {
         private void workFlowImageProcessExecute() {
             prepareProcessImageState();
             if (imageProcess == null) {
+                if (fileName == null) {
+                    if(!openImageWithDialog()) {
+                        resetImageState();
+                    }
+                    return;
+                }
                 openFile(fileName);
             } else if (imageProcess == false) {
                 processImage();
@@ -317,13 +324,16 @@ namespace CardRotager {
                 lbHintImageOpen.Visible = false;
                 lbHintImageProcess.Visible = false;
                 imageProcess = true;
-            } else {
-                Debug.WriteLine(l("Изображение обработано"));
-                lbHintImageOpen.Visible = true;
-                lbHintImageProcess.Visible = true;
-                lbHintImageOpen.Text = l("Открыть файл изображения с картами...\r\n(щелкните сюда)");
-                lbHintImageProcess.Text = l("Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)");
             }
+            WinSpecific.UseWaitCursor = false;
+            Application.DoEvents();
+        }
+
+        private void resetImageState() {
+            lbHintImageOpen.Visible = true;
+            lbHintImageProcess.Visible = true;
+            lbHintImageOpen.Text = l("Открыть файл изображения с картами...\r\n(щелкните сюда)");
+            lbHintImageProcess.Text = l("Сформировать файл изображения с центированные изображения картами\r\n(щелкните сюда)");
             WinSpecific.UseWaitCursor = false;
             Application.DoEvents();
         }
@@ -439,6 +449,10 @@ namespace CardRotager {
         }
 
         private void menuImageOpen_Click(object sender, EventArgs e) {
+            openImageWithDialog();
+        }
+
+        private bool openImageWithDialog() {
             using (OpenFileDialog ofd = new OpenFileDialog()) {
                 if (!string.IsNullOrEmpty(fileName)) {
                     ofd.FileName = fileName;
@@ -447,12 +461,13 @@ namespace CardRotager {
                 if (ofd.ShowDialog() == DialogResult.OK) {
                     imageProcess = null;
                     prepareProcessImageState();
-                    openFile(ofd.FileName);
                     fileName = ofd.FileName;
+                    openFile(fileName);
                     postProcessImageState();
+                    return true;
                 }
             }
-
+            return false;
         }
 
         private void cbSelectIgnoreColor_Click(object sender, EventArgs e) {
@@ -523,20 +538,21 @@ namespace CardRotager {
 
         private void copyToolStripButton_Click(object sender, EventArgs e) {
             if (imageProcess != true || pbTarget.Image == null) {
+                MessageBox.Show(l("Скопировать можно только обработанный файл."),l("Копирование в буфер обмена"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             Clipboard.SetImage(pbTarget.Image);
         }
 
         private void menuPasteButton_Click(object sender, EventArgs e) {
-            if (imageProcess != true || !Clipboard.ContainsImage()) {
+            if (!Clipboard.ContainsImage()) {
                 return;
             }
-            pbOriginal.Image = Clipboard.GetImage();
-            imageProcess = false;
+            imageProcess = null;
+            prepareProcessImageState();
+            readImage(Clipboard.GetImage());
             fileName = null;
-            pbDraft.Image = null;
-            pbTarget.Image = null;
+            postProcessImageState();
         }
 
         private void menuImageSaveDraftItem_Click(object sender, EventArgs e) {

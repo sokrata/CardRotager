@@ -38,6 +38,7 @@ namespace CardRotager {
                 float centerY = (fromRegion.Top + fromRegion.Bottom) * 0.5f;
                 toGraphic.TranslateTransform(centerX, centerY);
                 toGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                //toGraphic.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 toGraphic.RotateTransform(2);
                 toGraphic.TranslateTransform(-centerX, -centerY);
                 float scale = (float)bmp.Width / bmp.Width;
