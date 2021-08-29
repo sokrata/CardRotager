@@ -10,7 +10,7 @@
 \r\nИтоговые горизонтальные линии: \r\n=\r\nThe resulting horizontal lines: \r\n
 \r\nИтоговые вертикальные линии: \r\n=\r\nThe resulting vertical lines: \r\n
 \r\nГабариты карт:\r\n=\r\nCard size: \r\n
-Обработка (Черно/Белое)=Processing (Black/White)
+Черновик (черно-белый)=Draft (black and white)
 Изображение=Image
 &Изображение=&Image
 &Открыть...=&Open...
@@ -32,3 +32,5 @@
 FillHorLine: {0} мс
 \r\nколонка: {0}\r\n=\r\ncolumn: {0} \r\n
 \r\n- {0} rowIndex:\r\n\r\n
+Вращение найденных изображений карт=Rotate found images of card
+Отображение линий контуров и разметки=Displaying contour and marking lines

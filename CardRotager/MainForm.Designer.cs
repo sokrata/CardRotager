@@ -40,6 +40,8 @@ namespace CardRotager {
             this.panelImage = new System.Windows.Forms.Panel();
             this.pbDraft = new System.Windows.Forms.PictureBox();
             this.splitPanelButtonAndLog = new System.Windows.Forms.SplitContainer();
+            this.cbShowHelpLines = new System.Windows.Forms.CheckBox();
+            this.cbRotateFoundSubImages = new System.Windows.Forms.CheckBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -219,7 +221,7 @@ namespace CardRotager {
             this.tabPageBW.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageBW.Size = new System.Drawing.Size(2734, 1539);
             this.tabPageBW.TabIndex = 0;
-            this.tabPageBW.Text = "Обработка (Черно/Белое)";
+            this.tabPageBW.Text = "Черновик (черно-белый)";
             this.tabPageBW.UseVisualStyleBackColor = true;
             // 
             // horSplitContainer
@@ -272,6 +274,8 @@ namespace CardRotager {
             // 
             // splitPanelButtonAndLog.Panel1
             // 
+            this.splitPanelButtonAndLog.Panel1.Controls.Add(this.cbShowHelpLines);
+            this.splitPanelButtonAndLog.Panel1.Controls.Add(this.cbRotateFoundSubImages);
             this.splitPanelButtonAndLog.Panel1.Controls.Add(this.textBox1);
             this.splitPanelButtonAndLog.Panel1.Controls.Add(this.label2);
             this.splitPanelButtonAndLog.Panel1.Controls.Add(this.label1);
@@ -283,6 +287,28 @@ namespace CardRotager {
             this.splitPanelButtonAndLog.Size = new System.Drawing.Size(622, 1533);
             this.splitPanelButtonAndLog.SplitterDistance = 64;
             this.splitPanelButtonAndLog.TabIndex = 14;
+            // 
+            // cbShowHelpLines
+            // 
+            this.cbShowHelpLines.AutoSize = true;
+            this.cbShowHelpLines.Checked = true;
+            this.cbShowHelpLines.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbShowHelpLines.Location = new System.Drawing.Point(248, 37);
+            this.cbShowHelpLines.Name = "cbShowHelpLines";
+            this.cbShowHelpLines.Size = new System.Drawing.Size(351, 24);
+            this.cbShowHelpLines.TabIndex = 4;
+            this.cbShowHelpLines.Text = "Отображение линий контуров и разметки";
+            this.cbShowHelpLines.UseVisualStyleBackColor = true;
+            // 
+            // cbRotateFoundSubImages
+            // 
+            this.cbRotateFoundSubImages.AutoSize = true;
+            this.cbRotateFoundSubImages.Location = new System.Drawing.Point(248, 8);
+            this.cbRotateFoundSubImages.Name = "cbRotateFoundSubImages";
+            this.cbRotateFoundSubImages.Size = new System.Drawing.Size(343, 24);
+            this.cbRotateFoundSubImages.TabIndex = 3;
+            this.cbRotateFoundSubImages.Text = "Вращение найденных изображений карт";
+            this.cbRotateFoundSubImages.UseVisualStyleBackColor = true;
             // 
             // textBox1
             // 
@@ -723,6 +749,8 @@ namespace CardRotager {
         private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem menuImageSaveItem;
         private System.Windows.Forms.ToolStripMenuItem menuImageSaveDraftItem;
+        private System.Windows.Forms.CheckBox cbRotateFoundSubImages;
+        private System.Windows.Forms.CheckBox cbShowHelpLines;
     }
 }
 
