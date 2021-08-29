@@ -14,7 +14,10 @@ namespace CardRotager {
     /// </summary>
     public class LinesHDetector : LinesDetectorBase {
 
-        public LinesHDetector() {
+        StringBuilder sb;
+
+        public LinesHDetector(StringBuilder sb) {
+            this.sb = sb;
         }
 
         /// <summary>
@@ -24,7 +27,7 @@ namespace CardRotager {
         /// <param name="sb"></param>
         /// <param name="bitmap"></param>
         /// <returns></returns>
-        public static int[] findHDots(UnmanagedImage unmandImage, int width, int height, int startY = -1, int endY = -1) {
+        public int[] findHDots(UnmanagedImage unmandImage, int width, int height, int startY = -1, int endY = -1) {
             int[] dots = new int[width];
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -74,8 +77,8 @@ namespace CardRotager {
         /// <param name="width"></param>
         /// <param name="debug"></param>
         /// <returns></returns>
-        public static List<Edge> createHLine(ref int[] dots, StringBuilder sb, int killLength, int startX, int width, bool debug = false) {
-            makeHLine(ref dots, startX, width, out List<Edge> lines, out int checkRadiusY);
+        public List<Edge> createHLine(int[] dots, int killLength, int startX, int width, bool debug = false) {
+            makeHLine(dots, startX, width, out List<Edge> lines, out int checkRadiusY);
 
             //удалим короткие линии
             for (int lineIndex = lines.Count - 1; lineIndex >= 0; lineIndex--) {
@@ -223,7 +226,7 @@ namespace CardRotager {
         /// <param name="width"></param>
         /// <param name="lines"></param>
         /// <param name="checkRadiusY"></param>
-        private static void makeHLine(ref int[] dots, int startX, int width, out List<Edge> lines, out int checkRadiusY) {
+        private void makeHLine(int[] dots, int startX, int width, out List<Edge> lines, out int checkRadiusY) {
             lines = new List<Edge>();
             bool wasGap = false;
             int checkRadiusDotY = 5;

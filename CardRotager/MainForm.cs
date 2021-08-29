@@ -81,17 +81,17 @@ namespace CardRotager {
 
         private void processImage() {
             StringBuilder sb = new StringBuilder();
-            ImageProcessor ip = new ImageProcessor(localize);
+            ImageProcessor ip = new ImageProcessor(localize, sb);
             Bitmap bmpDraft = ((Bitmap)pbDraft.Image);
             pbTarget.Image = null;
             bool showHelpLines = cbShowHelpLines.Checked;
 
-            ip.prepareData(sb, bmpDraft, out List<Line> dashLines,out List<Edge> angleEdge, out int[] showDots);
+            ip.createHorAndVertLines(bmpDraft);
 
             int width = bmpDraft.Width;
             int height = bmpDraft.Height;
             using (Graphics graphics = Graphics.FromImage(bmpDraft)) {
-                drawler.DrawDots(graphics, Pens.Red, 2, showDots, true);
+                drawler.drawDots(graphics, Pens.Red, 2, ip.Dots, true);
 
                 float[] dashValues = { 5, 2, 15, 4 };
                 Pen redDashPen = new Pen(Color.Red, 5) {
@@ -99,7 +99,7 @@ namespace CardRotager {
                 };
 
                 sb.AppendLine(l("Линии-границы поиска горизонтальных линий ниже верхних:"));
-                foreach (var item in dashLines) {
+                foreach (var item in ip.DashLines) {
                     sb.AppendFormat("{0}\r\n", item);
                     if (showHelpLines) {
                         graphics.DrawLine(redDashPen, item.X, item.Y1, item.X2, item.Y2);
@@ -109,7 +109,7 @@ namespace CardRotager {
                 sb.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
                 ip.HLinesAll.Sort((x, y) => x.Y.CompareTo(y.Y));
                 if (showHelpLines) {
-                    drawler.DrawLines(graphics, ip.HLinesAll, Pens.Cyan, sb, true, ImageProcessor.THICK);
+                    drawler.drawLines(graphics, ip.HLinesAll, Pens.Cyan, sb, true, ImageProcessor.THICK);
                 }
 
                 sb.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
@@ -120,12 +120,12 @@ namespace CardRotager {
                     return line1.Y.CompareTo(line2.Y);
                 });
                 if (showHelpLines) {
-                    drawler.DrawLines(graphics, ip.VLinesAll, Pens.Blue, sb, true, ImageProcessor.THICK);
+                    drawler.drawLines(graphics, ip.VLinesAll, Pens.Blue, sb, true, ImageProcessor.THICK);
                 }
 
                 sb.AppendLine(l("Линии, по которым расчитывается угол наклона карт"));
                 Pen anglePen = new Pen(Color.Lime, 12);
-                foreach (var item in angleEdge) {
+                foreach (var item in ip.AngleEdges) {
                     sb.AppendFormat("{0}\r\n", item);
                     if (showHelpLines) {
                         graphics.DrawLine(anglePen, item.X, item.Y, item.X2, item.Y2);
@@ -134,14 +134,16 @@ namespace CardRotager {
 
                 rectangles = makeRect(sb, ip.HLinesAll, ip.VLinesAll, out List<float> angles);
 
-                //drawler.DrawRuler(graphics);
+                if (showHelpLines) {
+                    drawler.drawRuler(graphics, width, height);
+                }
                 const int penWidth = 7;
                 Pen penFrame = new Pen(Color.LimeGreen, penWidth);
                 const int EXTEND_SIDE = 50;
                 Bitmap originalImage = (Bitmap)pbOriginal.Image;
                 Bitmap targetImage = createEmtpyBitmapSource(width, height, originalImage);
                 using (Graphics targetGraphics = Graphics.FromImage(targetImage)) {
-                    List<Rectangle> rectDest = drawler.MakeFrame();
+                    List<Rectangle> rectDest = drawler.makeFrame();
                     targetGraphics.Clear(Color.White);
                     for (int i = 0; i < rectDest.Count; i++) {
                         if (i >= rectangles.Count) {
@@ -156,14 +158,14 @@ namespace CardRotager {
                     }
                     //drawler.DrawFrame(targetGraphics, penFrame, rectDest);
                     if (showHelpLines) {
-                        drawler.DrawTargetFrame(targetGraphics, penFrame, width, height);
+                        drawler.drawTargetFrame(targetGraphics, penFrame, width, height);
                     }
                 }
                 pbTarget.Image = targetImage;
                 tbLog.Text = sb.ToString();
                 if (showHelpLines) {
                     using (Graphics originalGraphic = Graphics.FromImage(originalImage)) {
-                        drawler.DrawRect(originalGraphic, rectangles);
+                        drawler.drawRect(originalGraphic, rectangles);
                     }
                 }
             }
@@ -268,7 +270,7 @@ namespace CardRotager {
 
 
                 //graphics = Graphics.FromImage(bitmap);
-                drawler = new Drawler(this);
+                drawler = new Drawler();
                 //graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 //tbLog.Text = string.Format("w = {0}, h = {1}, w,h = {2}, {3}; res X,Y = {4}, {5}", bitmap.Width, bitmap.Height, imageBlackWhite.Width, imageBlackWhite.Height, this.bitmap.HorizontalResolution, this.bitmap.VerticalResolution);
 

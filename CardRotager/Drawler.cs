@@ -4,34 +4,44 @@ using System.Text;
 
 namespace CardRotager {
     public class Drawler {
+
+        /// <summary>
+        /// Размер шрифта для текста
+        /// </summary>
         private Font FontTextLine { get; set; }
-        public Drawler(MainForm mainForm) {
+
+        public Drawler() {
             FontTextLine = new Font("Arial", 120);
         }
 
-        //public void DrawRuler(Graphics graphics) {
-        //    for (int i = 0; i < mf.pbBlackWhite.Width; i += 100) {
-        //        DrawVLineWithText(graphics, i - 50, 15);
-        //        DrawVLineWithText(graphics, i, 30);
-        //    }
-        //}
-
-        private void DrawVLineWithText(Graphics graphics, int x, int v) {
-            graphics.DrawLine(Pens.Green, x, 0, x, v);
-            graphics.DrawString(x.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, x + 2, 0);
+        public void drawRuler(Graphics graphics, int width, int height) {
+            for (int x = 0; x < width; x += 100) {
+                drawVLineWithText(graphics, x - 50, 15);
+                drawVLineWithText(graphics, x, 30);
+            }
+            for (int y = 0; y < height; y += 100) {
+                drawHLineWithText(graphics, y - 50, 15, width);
+                drawHLineWithText(graphics, y, 30, width);
+            }
         }
 
-        //private void DrawLineWithText(Graphics graphics, int y, int v) {
-        //    graphics.DrawLine(Pens.Green, Width - v, y, Width, y);
-        //    graphics.DrawString(y.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, Width - v, y);
-        //}
+        private StringFormat sf = new StringFormat(StringFormatFlags.DirectionVertical);
+        private void drawHLineWithText(Graphics graphics, int y, int lineLen, int width) {
+            graphics.DrawLine(Pens.Green, width - lineLen, y, width, y);
+            graphics.DrawString(y.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, width - lineLen, y, sf);
+        }
 
-        public void DrawDotX(Graphics graphics, Pen p, int x, int y, int dotSide = 5) {
+        private void drawVLineWithText(Graphics graphics, int x, int lineLen) {
+            graphics.DrawLine(Pens.Green, x, 0, x, lineLen);
+            graphics.DrawString(x.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, x + 2, 0);
+        }
+                
+        public void drawDotX(Graphics graphics, Pen p, int x, int y, int dotSide = 5) {
             graphics.DrawLine(p, x - dotSide, y, x + dotSide, y);
             graphics.DrawLine(p, x, y - dotSide, x, y + dotSide);
         }
 
-        public void DrawLines(Graphics graphics, List<Edge> lines, Pen red, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
+        public void drawLines(Graphics graphics, List<Edge> lines, Pen red, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
             int i = 0;
 
             //sb.AppendLine();
@@ -58,7 +68,7 @@ namespace CardRotager {
         }
 
 
-        public void DrawDots(Graphics graphics, Pen red, int dotSide, int[] dots, bool isDotX = true) {
+        public void drawDots(Graphics graphics, Pen red, int dotSide, int[] dots, bool isDotX = true) {
             if (dots == null) {
                 return;
             }
@@ -72,11 +82,11 @@ namespace CardRotager {
             }
         }
 
-        public void DrawDot(Graphics graphics, Pen red, int x, int y, int dotSide) {
+        public void drawDot(Graphics graphics, Pen red, int x, int y, int dotSide) {
             graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
         }
 
-        private void DrawCross(Graphics graphics, int x, int y, int CrossRadius) {
+        private void drawCross(Graphics graphics, int x, int y, int CrossRadius) {
             graphics.DrawLine(Pens.Red, x - CrossRadius, y, x + CrossRadius, y);
             graphics.DrawLine(Pens.Red, x, y - CrossRadius, x, y + CrossRadius);
         }
@@ -90,29 +100,30 @@ namespace CardRotager {
         const int Y4 = 9760;
         const int Y5 = 12959;
 
-        public List<Rectangle> MakeFrame() {
-            List<Rectangle> rects = new List<Rectangle>();
-            //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
-            rects.Add(new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)));
-            rects.Add(new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)));
+        public List<Rectangle> makeFrame() {
+            List<Rectangle> rects = new List<Rectangle> {
+                //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
+                new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)),
+                new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)),
 
-            rects.Add(new Rectangle(X1, Y2, (X2 - X1), (Y3 - Y2)));
-            rects.Add(new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)));
+                new Rectangle(X1, Y2, (X2 - X1), (Y3 - Y2)),
+                new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)),
 
-            rects.Add(new Rectangle(X1, Y3, (X2 - X1), (Y4 - Y3)));
-            rects.Add(new Rectangle(X2, Y3, (X3 - X2), (Y4 - Y3)));
+                new Rectangle(X1, Y3, (X2 - X1), (Y4 - Y3)),
+                new Rectangle(X2, Y3, (X3 - X2), (Y4 - Y3)),
 
-            rects.Add(new Rectangle(X1, Y4, (X2 - X1), (Y5 - Y4)));
-            rects.Add(new Rectangle(X2, Y4, (X3 - X2), (Y5 - Y4)));
+                new Rectangle(X1, Y4, (X2 - X1), (Y5 - Y4)),
+                new Rectangle(X2, Y4, (X3 - X2), (Y5 - Y4))
+            };
             return rects;
         }
 
-        public void DrawFrame(Graphics gr, Pen penFrame, List<Rectangle> rectangles) {
+        public void drawFrame(Graphics gr, Pen penFrame, List<Rectangle> rectangles) {
             foreach (var item in rectangles) {
                 gr.DrawRectangle(penFrame, item);
             }
         }
-        public void DrawTargetFrame(Graphics gr, Pen penFrame, int Width, int Height) {
+        public void drawTargetFrame(Graphics gr, Pen penFrame, int Width, int Height) {
             gr.DrawLine(penFrame, X1, 0, X1, Height);
             gr.DrawLine(penFrame, X2, 0, X2, Height);
             gr.DrawLine(penFrame, X3, 0, X3, Height);
@@ -123,7 +134,7 @@ namespace CardRotager {
             gr.DrawLine(penFrame, 0, Y5, Width, Y5);
         }
 
-        internal void DrawRect(Graphics graphics, List<Rectangle> rectangles) {
+        public void drawRect(Graphics graphics, List<Rectangle> rectangles) {
             foreach (var item in rectangles) {
                 graphics.DrawRectangle(new Pen(RandomColors.RandomColor, 5), item);
             }
