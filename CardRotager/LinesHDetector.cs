@@ -11,9 +11,8 @@ namespace CardRotager {
     /// 
     /// </summary>
     public class LinesHDetector : LinesDetectorBase {
-        
-        private const int PERCENT_HOR_PADDING = 5;
-        
+       
+       
         public List<Edge> HLines {
             get => LineEdges;
         }
@@ -28,8 +27,7 @@ namespace CardRotager {
         /// Найти и заполнить все точки 
         /// с возможностью задать ограничения по Y если не заполнены startY/endY
         /// </summary>
-        /// <param name="sb"></param>
-        /// <param name="bitmap"></param>
+        /// <param name="image"></param>
         public void findHDots(UnmanagedImage image, int width, int height, int startX = -1, int endX = -1, int startY = -1, int endY = -1) {
             Dots = new int[width];
 
@@ -56,7 +54,8 @@ namespace CardRotager {
                     }
                 }
             }
-
+            // int[] dt = new int[Dots.Length];
+            // Dots.CopyTo(dt, 0);
             findShortLines(width);
             for (int i = 0; i < shortLines.Count; i++) {
                 Point curLine = shortLines[i];
@@ -74,6 +73,7 @@ namespace CardRotager {
                     resetDots(curLine.Y, curLine.Y - curLine.X, nextLineY);
                 }
             }
+            // return dt;
         }
 
         private void findShortLines(int width) {
@@ -98,8 +98,10 @@ namespace CardRotager {
         /// </summary>
         /// <param name="startX"></param>
         /// <param name="width"></param>
+        /// <param name="settingsPercentHorizontalPadding"></param>
+        /// <param name="angleLines2"></param>
         /// <returns></returns>
-        public void fillLineEdges(int startX, int width, out List<Edge> angleLines2) {
+        public void fillLineEdges(int startX, int width, int settingsPercentHorizontalPadding, out List<Edge> angleLines2) {
             const int checkRadiusY = 12;
             const int DIFF = 100;
             makeHLines(startX, width);
@@ -107,6 +109,9 @@ namespace CardRotager {
             //1. сформируем список линий чтобы понять общую длину
             //2. отберем те линии что 
 
+            if (settingsPercentHorizontalPadding != 0) {
+                
+            }
             // объединим со следующей линией (что рядом) по горизонтали, если по вертикали линии ближе чем checkRadiusY
             for (int i = LineEdges.Count - 2; i >= 0; i--) {
                 Edge curLine = LineEdges[i];
@@ -116,6 +121,7 @@ namespace CardRotager {
                 }
                 curLine.getPoints().AddRange(nextLine.getPoints());
                 curLine.prependPoint(curLine.X2, curLine.Y2);
+                curLine.prependPoint(curLine.X, curLine.Y);
                 curLine.X2 = nextLine.X2;
                 curLine.Y2 = nextLine.Y2;
                 LineEdges.RemoveAt(i + 1);
@@ -123,8 +129,7 @@ namespace CardRotager {
 
             for (int i = 0; i < LineEdges.Count; i++) {
                 Edge curLine = LineEdges[i];
-                curLine.calcAngle(true, PERCENT_HOR_PADDING);
-                angleLines2.Add(new Edge(curLine));
+                angleLines2.Add(new Edge(curLine.calcAngle(true, settingsPercentHorizontalPadding)));
             }
 
             for (int i = LineEdges.Count - 2; i >= 0; i--) {

@@ -5,6 +5,9 @@ using System.Text;
 namespace CardRotager {
     public class Drawler {
 
+        const int penWidth = 7;
+        Pen penFuchsia = new Pen(Color.Fuchsia, penWidth);
+        
         /// <summary>
         /// Размер шрифта для текста
         /// </summary>
@@ -49,25 +52,38 @@ namespace CardRotager {
             }
         }
 
-        public void drawLine(Graphics graphics, Edge line, Pen pen, int thicknessLine) {
+        public static void drawLine(Graphics graphics, Edge line, Pen pen, int thicknessLine) {
             if (thicknessLine != 1) {
                 pen = new Pen(pen.Color, thicknessLine);
             }
             graphics.DrawLine(pen, line.X, line.Y, line.X2 + 1, line.Y2 + 1);
         }
 
+        public static void drawHorizontalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
+            if (dots == null) {
+                return;
+            }
+            for (int x = 0; x < dots.Length; x++) {
+                int y = dots[x];
+                if (dotSide == 0) {
+                    graphics.DrawRectangle(red, x, y, 1, 1);
+                } else {
+                    graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
+                }
+            }
+        }
+
         public static void drawVerticalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
             if (dots == null) {
                 return;
             }
-
-            for (int x = 0; x < dots.Length; x++) {
-                int y = dots[x];
+            
+            for (int y = 0; y < dots.Length; y++) {
+                int x = dots[y];
                 if (dotSide == 0) {
-                    graphics.DrawRectangle(red, y, x, 1, 1);
-                }
-                else {
-                    graphics.DrawLine(red, y - dotSide, x, y + dotSide, x);
+                    graphics.DrawRectangle(red, x, y, 1, 1);
+                } else {
+                    graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
                 }
             }
         }
@@ -127,6 +143,15 @@ namespace CardRotager {
         public void drawRect(Graphics graphics, List<Rectangle> rectangles) {
             foreach (var item in rectangles) {
                 graphics.DrawRectangle(new Pen(RandomColors.RandomColor, 5), item);
+            }
+        }
+        public void drawPolyLine(Graphics graphics, HVLine hvLine) {
+            if (hvLine == null) {
+                return;
+            }
+            List<Point> points = hvLine.HLine.getPoints();
+            for (int i = 1; i < points.Count; i++) {
+                graphics.DrawLine(penFuchsia, points[i - 1], points[i]);
             }
         }
     }

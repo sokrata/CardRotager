@@ -6,10 +6,11 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace CardRotager {
     public class ImageProcessor {
-        public const int KillLength = 120;
+        public const int KillLength = 140;
 
         /// <summary>
         /// Минимальная длина линии которая уходит для обработки рамки карты
@@ -18,7 +19,6 @@ namespace CardRotager {
 
         public const int MIN_LINE_SIZE_Y = 60; //для маленькой картинки должно быть поменьше, для большой 100 (>500).
         public const int THICK = 18;
-        public const int mergeValueY = 300;
         public const int Y_MAX_DOTLINE_SUBSTRACT = 200;
         public const int Y_MIN_DOTLINE_ADD = 150;
         public const int X_MIN_DOTLINE_ADD = 100;
@@ -26,28 +26,28 @@ namespace CardRotager {
         private readonly LinesHDetector linesHDetector;
         private readonly LinesVDetector linesVDetector;
         private readonly StringBuilder sb;
+        private readonly Settings settings;
 
-        public ImageProcessor(Localize localize, StringBuilder sb) {
+        public ImageProcessor(Localize localize, StringBuilder sb, Settings settings) {
             this.localize = localize;
             linesHDetector = new LinesHDetector();
             linesVDetector = new LinesVDetector();
             this.sb = sb;
+            this.settings = settings;
         }
 
         public List<List<HVLine>> LinesAll { get; set; }
-
-        // public Dictionary<int, List<Edge>> VLinesAll { get; set; } = new Dictionary<int, List<Edge>>();
         public List<Line> DashLines { get; set; }
         public List<Edge> AngleEdges { get; set; }
         public List<Line> ShowLines { get; set; }
 
-        // /// <summary>
-        // /// Последний обработанный массив точек для горизонтальной линии
-        // /// </summary>
-        // public int[] HDots { get; set; }
+        /// <summary>
+        /// Все обработанные массивы точек для горизонтальных линии
+        /// </summary>
+        public int[] DotsHorizontal { get; set; }
 
         /// <summary>
-        /// Последний обработанный массив точек для вертикальных линии
+        /// Все обработанные массивы точек для вертикальных линии
         /// </summary>
         public int[] DotsVertical { get; set; }
 
@@ -57,7 +57,7 @@ namespace CardRotager {
         /// Составим сетку - колонки и строки (из горизонтальных и вертикальных линий контуров карт).
         /// 
         /// 1. Составляем верхние горизонтальные линии (по числу рядов карт) - MakeFirstHLines
-        /// 2. Формируем вертикальные линии для каждой колонки взятой из каждой горизонтальной линии - ProcessColumLines
+        /// 2. Формируем вертикальные линии для каждой колонки взятой из каждой горизонтальной линии - ProcessColumnLines
         /// 3. Создаем колонки вертикальных линий (Объединяя рядом стоящие вертикальные линии)
         /// </summary>
         /// <param name="bitmap"></param>
@@ -78,6 +78,16 @@ namespace CardRotager {
 
                     List<Edge> firstHLines = makeFirstHLines(unmanImage, width, height);
                     int hCount = firstHLines.Count;
+                    if (hCount != 2) {
+                        string msg = string.Format(l("Поскольку количество колонок не 2, обработка невозможна. Поддерживается обработка картинок содержащих только 2 колонки и 4 строки"));
+                        if (sb == null) {
+                            MessageBox.Show(msg, l("Ошибка"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        } else {
+                            sb.AppendLine(l("ОБРАБОТКА прервана!\r\n\r\n"));
+                            sb.Append(msg);
+                        }
+                        return;
+                    }
                     LinesAll = new List<List<HVLine>>(hCount);
                     for (int colIndex = 0; colIndex < hCount; colIndex++) {
                         Edge hLine = firstHLines[colIndex];
@@ -86,7 +96,7 @@ namespace CardRotager {
                     stopwatch.Stop();
                     sb?.AppendFormat(l("\r\nИтоговое время определения верхнего ряда: {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
                     stopwatch.Restart();
-                    
+
                     int colCount = LinesAll.Count;
                     sb?.AppendFormat("Определено {0} колон(ки/ок)\r\n", colCount);
                     // вертикальные линии:
@@ -109,7 +119,7 @@ namespace CardRotager {
 
                         for (int rowIndex = rowCount - 1; rowIndex > 0; rowIndex--) {
                             //добавляем горизонтальные линии в колонке
-                            List<Edge> hLines = processRowLines(unmanImage, colIndex, rowIndex, startX, endX, height, vLineRows);
+                            List<Edge> hLines = processRowLines(unmanImage, colIndex, rowIndex, startX, endX, height, vLineRows, rowCount);
                             LinesAll[colIndex][rowIndex].HLine = hLines[0];
                         }
 
@@ -167,7 +177,7 @@ namespace CardRotager {
             return vLines;
         }
 
-        private List<Edge> processRowLines(UnmanagedImage unmanagedImage, int colIndex, int rowIndex, int startX, int endX, int height, List<Edge> vLineRows) {
+        private List<Edge> processRowLines(UnmanagedImage unmanagedImage, int colIndex, int rowIndex, int startX, int endX, int height, List<Edge> vLineRows, int rowCount) {
             getRangeY(height, vLineRows, rowIndex, out int minY, out int maxY);
 
             //линии верхняя и нижняя для отображения позже на форме
@@ -176,9 +186,14 @@ namespace CardRotager {
 
             //для текущей строки формируем строку точек ниже minY но выше maxY
             linesHDetector.findHDots(unmanagedImage, endX, height, startX, endX, minY, maxY);
+            if (settings.ShowDetailDotsOfImageNumber > 0) {
+                if (rowCount * colIndex + rowIndex == settings.ShowDetailDotsOfImageNumber - 1) {
+                    DotsHorizontal = linesHDetector.HDots;
+                }
+            }
 
             //получаем список всех горизонтальных линий из точек
-            linesHDetector.fillLineEdges(startX, endX, out List<Edge> angleLines2);
+            linesHDetector.fillLineEdges(startX, endX, settings.PercentHorizontalPadding, out List<Edge> angleLines2);
             List<Edge> hLines = linesHDetector.HLines;
             for (int lineIndex = hLines.Count - 1; lineIndex >= 0; lineIndex--) {
                 if (hLines[lineIndex].Width < MIN_LINE_SIZE_Y) {
@@ -215,7 +230,7 @@ namespace CardRotager {
             }
         }
 
-        private List<Edge> makeLineRows(StringBuilder sb, int colIndex, List<Edge> columnLines, int width, out int endX) {
+        private static List<Edge> makeLineRows(StringBuilder sb, int colIndex, List<Edge> columnLines, int width, out int endX) {
             List<Edge> vLineRows = new List<Edge>();
             vLineRows.AddRange(columnLines);
             vLineRows.Sort((x, y) => x.Y.CompareTo(y.Y));
@@ -237,7 +252,7 @@ namespace CardRotager {
         }
 
         private void getRangeX(int colIndex, int colCount, int width, out int minX, out int maxX) {
-            int rowIndex = 0;
+            const int rowIndex = 0;
             if (colIndex == colCount - 1) {
                 maxX = width;
             } else {
@@ -259,25 +274,45 @@ namespace CardRotager {
         /// 2. Создаем из них линии - вызов метода CreateHLine
         /// 3. Удаляем короткие линии (меньше длины MIN_LINE_SIZE), чтобы мусорные пылинки на скане не мешали работать с линией
         /// </summary>
-        /// <param name="sb"></param>
         /// <param name="image"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns>Список горизонтальных линий</returns>
         private List<Edge> makeFirstHLines(UnmanagedImage image, int width, int height) {
             linesHDetector.findHDots(image, width, height);
-            linesHDetector.fillLineEdges( 0, width, out List<Edge> angleLines2);
+            linesHDetector.fillLineEdges(0, width, settings.PercentHorizontalPadding, out List<Edge> angleLines2);
             AngleEdges.AddRange(angleLines2);
             addSbInfo(linesHDetector.HLines);
             return linesHDetector.HLines;
         }
 
         private void addSbInfo(List<Edge> hLinesAll) {
-            if (sb != null) {
-                for (int i = 0; i < hLinesAll.Count; i++) {
-                    sb.AppendFormat("{0}: {1}\r\n", i + 1, hLinesAll[i]);
-                }
+            if (sb == null) {
+                return;
             }
+
+            for (int i = 0; i < hLinesAll.Count; i++) {
+                sb.AppendFormat("{0}: {1}\r\n", i + 1, hLinesAll[i]);
+            }
+        }
+
+        public HVLine getLineByImageIndex(int imageIndex) {
+            if (imageIndex < 0 || LinesAll.Count <= 0 || imageIndex >= getImageCount()) {
+                return null;
+            }
+            int linesRowCountInFirstColumn = LinesAll[0].Count;
+            return LinesAll[imageIndex / linesRowCountInFirstColumn][imageIndex % linesRowCountInFirstColumn];
+        }
+
+        private int getImageCount() {
+            int count = 0;
+            if (LinesAll == null || LinesAll.Count == 0) {
+                return count;
+            }
+            for (int colIndex = 0; colIndex < LinesAll.Count; colIndex++) {
+                count += LinesAll[colIndex].Count;
+            }
+            return count;
         }
     }
 }

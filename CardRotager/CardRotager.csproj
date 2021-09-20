@@ -95,6 +95,7 @@
       <DependentUpon>Form2.cs</DependentUpon>
     </Compile>
     <Compile Include="HelpClass.cs" />
+    <Compile Include="Helper\UIFolderNameEditor.cs" />
     <Compile Include="HSBColor.cs" />
     <Compile Include="ImageProcessor.cs" />
     <Compile Include="HVLine.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Drawler.cs" />
     <Compile Include="RandomColors.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="LinesHDetector.cs" />
     <Compile Include="WinSpecific.cs" />

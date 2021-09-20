@@ -185,7 +185,7 @@ namespace CardRotager {
 
         public void localizeControlAll(MainForm mainForm) {
             loadTranslatedText();
-            localizeControl(mainForm.lbHintImageOpen);
+            localizeControl(mainForm.lbHintSource);
             localizeControl(mainForm.lbHintTarget);
             localizeControl(mainForm);
             localizeControl(mainForm.tabPageBW);
@@ -208,9 +208,9 @@ namespace CardRotager {
             localizeControl(mainForm.menuImageSaveButton);
             localizeControl(mainForm.menuProcessButton);
 
-            localizeControl(mainForm.label1);
-            localizeControl(mainForm.cbRotateFoundSubImages);
-            localizeControl(mainForm.cbShowHelpLines);
+            // localizeControl(mainForm.label1);
+            // localizeControl(mainForm.cbRotateFoundSubImages);
+            // localizeControl(mainForm.cbShowHelpLines);
         }
     }
 }

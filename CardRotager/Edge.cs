@@ -64,20 +64,27 @@ namespace CardRotager {
             angle = getAngle(horizontal);
         }
 
-        public void calcAngle(bool horizontal, int percentHorPadding) {
+        public Edge calcAngle(bool horizontal, int percentHorPadding) {
             if (percentHorPadding == 0 || points.Count == 0) {
                 calcAngle(horizontal);
-                return;
+                return this;
             }
             if (horizontal) {
                 int horPadding = (int)Math.Ceiling(((double) percentHorPadding / 100) * Width);
                 int cropW = Width;
                 int startPointIndex = 0;
+                int startX = X;
+                int endX = X2;
+                int startY = Y;
+                int endY = Y2;
                 for (int pointIndex = 0; pointIndex < points.Count; pointIndex++) {
                     Point curPoint = points[pointIndex];
                     if (X + horPadding < curPoint.X) {
                         cropW -= curPoint.X;
+                        startX += curPoint.X - X;
+                        startY = curPoint.Y;
                         startPointIndex = pointIndex;
+                        
                         break;
                     }
                 }
@@ -85,13 +92,17 @@ namespace CardRotager {
                     Point curPoint = points[pointIndex];
                     if (curPoint.X <= X + Width - horPadding) {
                         cropW -= Width - curPoint.X;
+                        endY = curPoint.Y;
+                        endX -= Width - curPoint.X + X;
                         break;
                     }
                 }
-                angle = computeAngle(true, cropW, Height);
+                angle = computeAngle(true, cropW, endY - startY);
+                return new Edge(startX, startY, endX, endY, Terminate, angle);
             } else {
                 calcAngle(false);
             }
+            return this;
         }
 
         private double getAngle(bool horizontal) {
