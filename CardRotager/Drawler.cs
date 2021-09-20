@@ -22,6 +22,10 @@ namespace CardRotager {
             for (int y = 0; y < height; y += 100) {
                 drawHLineWithText(graphics, y - 50, 15, width);
                 drawHLineWithText(graphics, y, 30, width);
+
+                int rightY = width / 2;
+                drawHLineWithText(graphics, y - 50, 15, rightY);
+                drawHLineWithText(graphics, y, 30, rightY);
             }
         }
 
@@ -36,55 +40,35 @@ namespace CardRotager {
             graphics.DrawString(x.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, x + 2, 0);
         }
 
-        public void drawDotX(Graphics graphics, Pen p, int x, int y, int dotSide = 5) {
-            graphics.DrawLine(p, x - dotSide, y, x + dotSide, y);
-            graphics.DrawLine(p, x, y - dotSide, x, y + dotSide);
-        }
+        public void drawLine(Graphics graphics, Edge line, Pen red, int rowIndex, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
+            sb?.AppendFormat("{0}: {1}\r\n", rowIndex + 1, line);
 
-        public void drawLines(Graphics graphics, List<Edge> lines, Pen red, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
-            int i = 0;
-
-            //sb.AppendLine();
-            //sb.AppendFormat("Result Lines:");
-            sb?.AppendLine();
-
-            foreach (Edge item in lines) {
-                sb?.AppendFormat("{0}: {1}\r\n", i, item);
-
-                drawLine(graphics, item, red, thicknessLine);
-                if (withText) {
-                    graphics.DrawString(string.Format("{0}, {1}", item.X, item.Y), FontTextLine, Brushes.Black, item.X, item.Y - 20);
-                }
-
-                i++;
+            drawLine(graphics, line, red, thicknessLine);
+            if (withText) {
+                graphics.DrawString(string.Format("{0}, {1}", line.X, line.Y), FontTextLine, Brushes.Black, line.X, line.Y - 20);
             }
         }
 
-        public void drawLine(Graphics graphics, Edge item, Pen pen, int thicknessLine) {
+        public void drawLine(Graphics graphics, Edge line, Pen pen, int thicknessLine) {
             if (thicknessLine != 1) {
                 pen = new Pen(pen.Color, thicknessLine);
             }
-            graphics.DrawLine(pen, item.X, item.Y, item.X2 + 1, item.Y2 + 1);
+            graphics.DrawLine(pen, line.X, line.Y, line.X2 + 1, line.Y2 + 1);
         }
 
-
-        public void drawHorizontalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
+        public static void drawVerticalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
             if (dots == null) {
                 return;
             }
-            for (int x = 0; x < dots.Length; x++) {
-                int y = dots[x];
-                graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
-            }
-        }
 
-        public void drawVerticalDots(Graphics graphics, Pen red, int dotSide, int[] dots) {
-            if (dots == null) {
-                return;
-            }
             for (int x = 0; x < dots.Length; x++) {
                 int y = dots[x];
-                graphics.DrawLine(red, y - dotSide, x, y + dotSide, x);
+                if (dotSide == 0) {
+                    graphics.DrawRectangle(red, y, x, 1, 1);
+                }
+                else {
+                    graphics.DrawLine(red, y - dotSide, x, y + dotSide, x);
+                }
             }
         }
 
@@ -109,16 +93,16 @@ namespace CardRotager {
         public List<Rectangle> makeFrame() {
             List<Rectangle> rects = new List<Rectangle> {
                 //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
+                //first colunm:
                 new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)),
-                new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)),
-
                 new Rectangle(X1, Y2, (X2 - X1), (Y3 - Y2)),
-                new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)),
-
                 new Rectangle(X1, Y3, (X2 - X1), (Y4 - Y3)),
-                new Rectangle(X2, Y3, (X3 - X2), (Y4 - Y3)),
-
                 new Rectangle(X1, Y4, (X2 - X1), (Y5 - Y4)),
+                
+                //second column:
+                new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)),
+                new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)),
+                new Rectangle(X2, Y3, (X3 - X2), (Y4 - Y3)),
                 new Rectangle(X2, Y4, (X3 - X2), (Y5 - Y4))
             };
             return rects;

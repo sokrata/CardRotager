@@ -97,6 +97,7 @@
     <Compile Include="HelpClass.cs" />
     <Compile Include="HSBColor.cs" />
     <Compile Include="ImageProcessor.cs" />
+    <Compile Include="HVLine.cs" />
     <Compile Include="LinesDetectorBase.cs" />
     <Compile Include="LinesVDetector.cs" />
     <Compile Include="Localize.cs" />
@@ -105,9 +106,6 @@
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ImageRotater.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

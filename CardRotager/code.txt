@@ -127,11 +127,56 @@
 
 ================================================
 
+        /// <summary>
+        /// Попадает ли curValue в диапазон curValue - checkRadius и curValue + checkRadius (не включая крайние значения)
+        /// </summary>
+        /// <param name="curValue"></param>
+        /// <param name="checkRadius"></param>
+        /// <returns></returns>
+        public static bool inRange(double curValue, double checkRadius) {
+            return inRange(curValue, curValue, checkRadius);
+        }
+
+================================================
+
+
+                // if (lastEdge.Height > ImageProcessor.START_MIN_HEIGHT_FOR_DETECT_ANGLE) {
+                //     if (lastEdge.Angle == 0) {
+                //         //lastEdge.Angle = angle;
+                //     } else {
+                //         //if (inRange(lastEdge.Angle, 2)) {
+                //         //lastEdge.Angle = angle;
+                //         // Debug.WriteLine(lastEdge.ToString());
+                //         //}
+                //     }
+                // }
+                // } else {
+                //     addNewEdge(dotX, yCoord, false);
+                //     lastX1 = dotX;
+                //     lastY1 = yCoord;
+                // }
+                
+================================================
+
+            // for (int curIndex = lineEdges.Count - 1; curIndex >= 0; curIndex--) {
+            //     curLine = lineEdges[curIndex];
+            //     if (curLine.Height < minLineSizeY) {
+            //         //случай 3: объединить с предыдущей (если они рядом)
+            //         if (curIndex >= 1) {
+            //             Edge prevLine = lineEdges[curIndex - 1];
+            //             if (prevLine.Y2 == curLine.Y - 1) {
+            //                 // if (inRange(prevLine.X2, curLine.X, minLineSizeX)) {
+            //                     prevLine.Y2 = curLine.Y2;
+            //                     lineEdges.RemoveAt(curIndex);
+            //                 // }
+            //             }
+            //         }
+            //     }
+            // }
 ================================================
 
 ================================================
 
-================================================
 
 
 

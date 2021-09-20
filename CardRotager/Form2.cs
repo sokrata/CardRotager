@@ -8,8 +8,6 @@ using System.Windows.Forms;
 namespace CardRotager {
     public partial class Form2 : Form {
 
-        int i = 0;
-        //PictureBox pictureBox1;
         public Form2() {
             InitializeComponent();
         }

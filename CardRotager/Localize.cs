@@ -182,5 +182,35 @@ namespace CardRotager {
         public void resetLoadTranslate() {
             dictTranslate.Clear();
         }
+
+        public void localizeControlAll(MainForm mainForm) {
+            loadTranslatedText();
+            localizeControl(mainForm.lbHintImageOpen);
+            localizeControl(mainForm.lbHintTarget);
+            localizeControl(mainForm);
+            localizeControl(mainForm.tabPageBW);
+            localizeControl(mainForm.tabPageImage);
+
+            localizeControl(mainForm.menuImage);
+            localizeControl(mainForm.menuImageOpenItem);
+            localizeControl(mainForm.menuImageSaveItem);
+            localizeControl(mainForm.menuImageSaveDraftItem);
+            localizeControl(mainForm.menuImageCloseItem);
+            localizeControl(mainForm.menuImageProcessItem);
+            localizeControl(mainForm.menuImageExitItem);
+
+            localizeControl(mainForm.MenuView);
+            localizeControl(mainForm.MenuView10PercentItem);
+            localizeControl(mainForm.MenuViewFitItem);
+            localizeControl(mainForm.MenuViewScaleItem);
+
+            localizeControl(mainForm.menuImageOpenButton);
+            localizeControl(mainForm.menuImageSaveButton);
+            localizeControl(mainForm.menuProcessButton);
+
+            localizeControl(mainForm.label1);
+            localizeControl(mainForm.cbRotateFoundSubImages);
+            localizeControl(mainForm.cbShowHelpLines);
+        }
     }
 }

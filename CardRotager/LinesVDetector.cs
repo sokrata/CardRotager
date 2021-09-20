@@ -2,210 +2,214 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Text;
 
 namespace CardRotager {
-
+    
     /// <summary>
     /// Нахождение линий
     /// Класс чтеца картинок ImageWrapper: https://www.cyberforum.ru/blogs/529033/blog3507.html
     /// 
     /// </summary>
     public class LinesVDetector : LinesDetectorBase {
-        public LinesVDetector() {
-        }
+        public List<Line> ShowLines { get; } = new List<Line>();
+        
+        public List<Edge> VLines { get => LineEdges; }
 
+        public int[] DotsVertical {
+            get => Dots;
+        }
+        
         /// <summary>
-        /// Поиск точек контрастного цвет
+        /// Поиск точек контрастного цвета и удаление мусора (точек короче minLineSize)
         /// </summary>
         /// <param name="xMin"></param>
         /// <param name="xMax"></param>
         /// <param name="yMax"></param>
-        /// <param name="unmandImage"></param>
+        /// <param name="unmanagedImage"></param>
         /// <returns></returns>
-        public static int[] fillVDotsAll(int xMin, int xMax, int yMax, UnmanagedImage unmandImage) {
-            int[] dots = new int[yMax];
+        public void fillVDotsAll(int xMin, int xMax, int yMax, UnmanagedImage unmanagedImage) {
+            Dots = new int[yMax];
             for (int y = 0; y < yMax; y++) {
-                dots[y] = -1;
+                Dots[y] = -1;
                 for (int x = xMax - 1; x >= xMin; x--) {
-                    Color color = unmandImage.GetPixel(x, y);
+                    Color color = unmanagedImage.GetPixel(x, y);
                     float lightness = color.GetBrightness();
                     if (lightness >= 0 && lightness < 1) {
-                        dots[y] = x;
+                        Dots[y] = x;
                         break;
                     }
                 }
             }
-            return dots;
-        }
 
-        private static void makeVLine(ref int[] dots, int startY, int height, out List<Edge> lines, out int checkRadiusX) {
-            lines = new List<Edge>();
-            bool wasGap = false;
-            int checkRadiusY = 5;
-            checkRadiusX = 30;
-            for (int yCoord = startY; yCoord < height; yCoord++) {
-                int dotX = dots[yCoord];
-                if (yCoord == startY) {
-                    continue;
-                }
-                if (wasGap && dotX != -1) {
-                    addNewEdge(lines, dotX, yCoord, true);
-                    wasGap = false;
-                    continue;
-                }
-                if (dotX == -1) {
-                    wasGap = true;
-                    continue;
-                }
-                if (LinesDetectorBase.inRange(dotX, dots[yCoord - 1], checkRadiusY)) {
-                    if (lines.Count == 0) {
-                        addNewEdge(lines, dotX, yCoord, false);
+            int count = 0;
+            for (int curY = 0; curY < yMax; curY++) {
+                int curX = Dots[curY];
+                if (curY > 0 && inRange(curX, Dots[curY - 1], 10)) {
+                    count++;
+                } else {
+                    if (count > 0 && count < DEL_LINE_LESS_HEIGHT) {
+                        resetDots(curY, count, curX);
                     }
-                    Edge lastEdge = lines[lines.Count - 1];
-                    if (dotX != -1 && inRange(dotX, lastEdge.X2, checkRadiusX)) {
-                        lastEdge.Y2 = yCoord;
-                        lastEdge.X2 = dotX;
-                    } else {
-                        addNewEdge(lines, dotX, yCoord, false);
-                    }
+                    count = 1;
                 }
             }
         }
 
-        public static List<Edge> createVLine(int[] dots, StringBuilder sb, int killLength, int startY, int height, out List<Edge> angleLines2, bool debug = false) {
-            List<Edge> lines = new List<Edge>();
+        /// <summary>
+        /// Расчет угла для указанных сторон треугольника
+        /// </summary>
+        /// <param name="lastX1">x1</param>
+        /// <param name="lastY1">y1</param>
+        /// <param name="x2">x2</param>
+        /// <param name="y2">y2</param>
+        /// <returns></returns>
+        private static double getAngle(int lastX1, int lastY1, int x2, int y2) {
+            double width = x2 - lastX1;
+            double height = y2 - lastY1;
+            double radian = Math.Atan(Math.Abs(height) / Math.Abs(width));
+
+            return radian * (180 / Math.PI);
+        }
+
+        public void createVLine(StringBuilder sb, out List<Edge> angleLines2, bool debug = false) {
             angleLines2 = new List<Edge>();
-            makeVLine(ref dots, startY, height, out lines, out int checkRadiusX);
 
-            //удалим короткие линии
-            for (int lineIndex = lines.Count - 1; lineIndex >= 0; lineIndex--) {
-                if (lines[lineIndex].Height < killLength) {
-                    if (lineIndex > 0) {
-                        //поищем кем заменить
-                        if (lines[lineIndex - 1].Terminate || lines[lineIndex].Terminate) {
-                            if (lines[lineIndex].Terminate) {
-                                lines[lineIndex - 1].Terminate = lines[lineIndex].Terminate;
-                            }
-                        }
-                        if (debug)
-                            sb?.AppendFormat(l("delIndex = {0}: {1}\r\n"), lineIndex, lines[lineIndex]);
-                        if (lines[lineIndex].Y - lines[lineIndex - 1].Y2 < killLength) {
-                            bool terminate = true;
-                            if (lineIndex + 1 >= lines.Count
-                                || lineIndex + 1 < lines.Count && lines[lineIndex + 1].Y - lines[lineIndex].Y2 < killLength) {
-                                terminate = false;
-                            }
-                            lines[lineIndex - 1].Y2 = lines[lineIndex].Y2;
-                            lines[lineIndex - 1].Terminate = terminate;
-                        }
-                    }
-                    lines.RemoveAt(lineIndex);
+            //если нет точки - пропуск
+            //если точка есть:
+            // и она от предыдущей не больше minLineSize, то накопим в линию
+            // отрицание: то сложим в накопитель высоты
+            // если 
+            LineEdges = new List<Edge>();
+            //случай 1: дошли до линии (выше пустота)
+            //случай 2: закончилась линия (началась пустота)
+            //случай 3: изменился отступ и не большой высоты
+            //случай 4: изменился отступ, но большой высоты
+
+            Edge curLine = null;
+            int count = 0;
+            for (int curY = 0; curY < Dots.Length; curY++) {
+                int curX = Dots[curY];
+                if (curX == -1) {
+                    //случай 2
+                    curLine = null;
+                    continue;
+                }
+                if (curLine == null || !inRange(curX, curLine.X, ImageProcessor.MIN_LINE_SIZE_X)) {
+                    curLine = addLineEdge(LineEdges, curX, curY, false);
+                    count = -1;
+                }
+                curLine.X2 = curX;
+                curLine.Y2 = curY;
+                
+                count++;
+            }
+            for (int i = 0; i < LineEdges.Count; i++) {
+                curLine = LineEdges[i];
+                curLine.calcAngle(false, 0);
+                angleLines2.Add(new Edge(curLine));
+                if (i != 0) {
+                    Edge prevLine = LineEdges[i - 1];
+                    prevLine.Terminate = !inRange(curLine.Y, prevLine.Y2, 2);
                 }
             }
-
+            
             //найти самую длинную линию
             int max = -1;
             int maxIndex = -1;
-            List<int> longestLines = new List<int>();
-            for (int index = 0; index < lines.Count; index++) {
-                if (lines[index].Terminate) {
+            List<int> longestLineEdges = new List<int>();
+            for (int index = 0; index < LineEdges.Count; index++) {
+                Edge curEdge = LineEdges[index];
+                // curEdge.calcAngle(false);
+                if (curEdge.Height > max) {
+                    maxIndex = index;
+                    max = curEdge.Height;
+                }
+                if (curEdge.Terminate) {
                     if (max != -1) {
-                        longestLines.Add(maxIndex);
+                        longestLineEdges.Add(maxIndex);
                     }
                     max = -1;
                     maxIndex = -1;
                     continue;
                 }
-                if (lines[index].Height > max) {
-                    maxIndex = index;
-                    max = lines[index].Height;
-                }
+                ShowLines.Add(curEdge.toLine());
             }
             if (maxIndex != -1) {
-                longestLines.Add(maxIndex);
+                longestLineEdges.Add(maxIndex);
             }
-
-            if (sb != null && debug) {
-                sb.AppendLine(l("Список длинных линий:"));
-                for (int i = 0; i < longestLines.Count; i++) {
-                    int v1 = longestLines[i];
-                    sb.AppendFormat(@"{0} [{1}]: {2}", i, v1, lines[v1]);
-                    sb.AppendLine();
-                }
-                sb.AppendLine();
-                sb.AppendLine(l("Формирование единой непрерывной линии:"));
-            }
-
-            int sbInsert = 0;
+            
+            int checkRadiusX = 30;
             StringBuilder sb2 = null;
-            if (sb != null && debug) {
-                sbInsert = sb.Length;
-            }
-            if (longestLines.Count != 0) {
+            
+             for (int vIndex = longestLineEdges.Count - 1; vIndex >= 0; vIndex--) {
+                maxIndex = longestLineEdges[vIndex];
 
-                for (int vIndex = longestLines.Count - 1; vIndex >= 0; vIndex--) {
-                    maxIndex = longestLines[vIndex];
+                Edge maxLine = LineEdges[maxIndex];
 
-                    Edge maxLine = lines[maxIndex];
+                if (sb != null && debug) {
+                    sb2 = new StringBuilder(string.Format(l("обработка {0}: {1}\r\n"), maxIndex, maxLine));
+                }
 
-                    if (sb != null && debug) {
-                        sb2 = new StringBuilder(string.Format(l("обработка {0}: {1}\r\n"), maxIndex, maxLine));
+                //есть самый длинный, ищем вверх все что на этой линии и объединяем
+                int longestIndex = maxIndex;
+
+                Edge longEdge = LineEdges[longestIndex];
+
+                //поиск вверх до прерывателя (terminate) или начала
+                int curIndex = longestIndex - 1;
+                while (curIndex >= 0) {
+                    Edge curEdge = LineEdges[curIndex];
+                    if (curEdge.Terminate) {
+                        //не надо объединять с предыдущим, т.к. terminate означает что обрыв на нижнем конце (если нужен верхний, то проставляется всегда у предыдущего)
+                        break;
                     }
-
-                    //есть самый длинный, ищем вверх все что на этой линии и объединяем
-                    int longestIndex = maxIndex;
-
-                    Edge longEdge = lines[longestIndex];
-                    longEdge.calcAngle(false);
-                    angleLines2.Add(new Edge(longEdge));
-
-                    //поиск влево до прерывателя (terminate) или начала
-                    int curIndex = longestIndex - 1;
-                    while (curIndex >= 0) {
-                        Edge curEdge = lines[curIndex];
-                        if (curEdge.Terminate) {
-                            break;
-                        }
-                        if (inRange(longEdge.X, curEdge.X2, checkRadiusX)) {
-                            longEdge.Y = curEdge.Y;
-                        }
-                        if (sb2 != null && debug) {
-                            sb2.AppendFormat(l("Назад {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
-                        }
-                        lines.RemoveAt(curIndex);
-                        longestIndex--;
-                        curIndex--;
+                    if (inRange(longEdge.X, curEdge.X2, checkRadiusX)) {
+                        longEdge.Y = curEdge.Y;
                     }
                     if (sb2 != null && debug) {
-                        sb2.AppendLine();
+                        sb2.AppendFormat(l("Назад {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
                     }
-
-                    //поиск вниз до прерывателя (terminate) или конца
-                    curIndex = longestIndex + 1;
-                    while (curIndex < lines.Count) {
-                        Edge curEdge = lines[curIndex];
-                        if (inRange(longEdge.X2, curEdge.X, checkRadiusX)) {
-                            longEdge.Y2 = curEdge.Y2;
-                        }
-                        if (sb2 != null && debug) {
-                            sb2.AppendFormat(l("Вперед {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
-                        }
-                        lines.RemoveAt(curIndex);
-                        if (curEdge.Terminate) {
-                            break;
-                        }
-                    }
+                    longestIndex--;
+                    angleLines2.RemoveAt(curIndex);
+                    LineEdges.RemoveAt(curIndex);
+                    curIndex--;
                 }
-                if (sb != null && debug) {
+                if (sb2 != null && debug) {
                     sb2.AppendLine();
-                    sb.Insert(sbInsert, sb2.ToString());
                 }
-            }
 
-            return lines;
+                //поиск вниз до прерывателя (terminate) или конца
+                curIndex = longestIndex + 1;
+                if (longEdge.Terminate) {
+                    continue;
+                }
+                while (curIndex < LineEdges.Count) {
+                    Edge curEdge = LineEdges[curIndex];
+                    if (inRange(longEdge.X2, curEdge.X, checkRadiusX)) {
+                        longEdge.Y2 = curEdge.Y2;
+                        longEdge.X2 = curEdge.X;
+                    }
+                    if (sb2 != null && debug) {
+                        sb2.AppendFormat(l("Вперед {0} объединена {2}: {1})\r\n"), maxIndex, longEdge, curIndex);
+                    }
+                    angleLines2.RemoveAt(curIndex);
+                    LineEdges.RemoveAt(curIndex);
+                    if (curEdge.Terminate) {
+                        break;
+                    }
+                }
+             }
+
+             const int killLength = ImageProcessor.KillLength;
+             for (int curIndex = LineEdges.Count - 1; curIndex >= 0; curIndex--) {
+                 Edge currentLine = LineEdges[curIndex];
+                 if (currentLine.Height > killLength) {
+                     continue;
+                 }
+                 angleLines2.RemoveAt(curIndex);
+                 LineEdges.RemoveAt(curIndex);
+             }
         }
-
     }
 }

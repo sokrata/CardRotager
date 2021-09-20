@@ -1,53 +1,65 @@
-﻿using AForge.Imaging;
+﻿using System;
+using AForge.Imaging;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text;
 
 namespace CardRotager {
     public class LinesDetectorBase {
-
-        public LinesDetectorBase() {
-        }
-
+        
+        public const int DEL_LINE_LESS_HEIGHT = 17;
+        protected int[] Dots { get; set; }
+        
+        protected List<Edge> LineEdges { get; set; }
+        
         public static UnmanagedImage prepareBitmap(Bitmap bitmap, out BitmapData imageData) {
             imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                 ImageLockMode.ReadWrite, bitmap.PixelFormat);
             return new UnmanagedImage(imageData);
         }
 
-        public static void addNewEdge(List<Edge> list, int x, int y, bool terminate) {
-            Edge edge = new Edge(x, y, x, y, terminate, 0);
-            insertNewLine(list, true, edge);
-            //return edge;
-        }
-        public static void prependNewEdge(List<Edge> list, int x, int y, bool terminate) {
-            Edge edge = new Edge(x, y, x, y, terminate, 0);
-            insertNewLine(list, false, edge);
-            //return edge;
+        protected static Edge addLineEdge(List<Edge> lineEdges, int startX, int startY, bool terminate) {
+            return addLineEdge(lineEdges, startX, startY, startX, startY, terminate);
         }
 
-        public static void insertNewLine(List<Edge> lines, bool toEnd, Edge edge) {
-            if (toEnd) {
-                lines.Add(edge);
-            } else {
-                lines.Insert(0, edge);
+        private static Edge addLineEdge(List<Edge> lineEdges, int startX, int startY, int endX, int endY, bool terminate) {
+            Edge edge = new Edge(startX, startY, endX, endY, terminate, double.NaN);
+            lineEdges.Add(edge);
+            return edge;
+        }
+
+        protected void resetDots(int x, int cnt, int newY) {
+            for (int x2 = x - cnt; x2 <= x; x2++) {
+                Dots[x2] = newY;
             }
         }
 
         /// <summary>
-        /// Попадает ли curValue в диапазон checkValue - checkRadius и checkValue + checkRadius
+        /// Попадает ли curValue в диапазон checkValue - checkRadius и checkValue + checkRadius (не включая крайние значения)
         /// </summary>
         /// <param name="curValue"></param>
         /// <param name="checkValue"></param>
         /// <param name="checkRadius"></param>
         /// <returns></returns>
-        public static bool inRange(int curValue, int checkValue, int checkRadius) {
+        protected static bool inRange(int curValue, int checkValue, int checkRadius) {
             return checkValue - checkRadius < curValue && curValue < checkValue + checkRadius;
         }
-        public static string l(string text) {
-            return MainForm.localize.localize(text);
+
+        /// <summary>
+        /// Попадает ли curValue в диапазон checkValue - checkRadius и checkValue + checkRadius (не включая крайние значения)
+        /// </summary>
+        /// <param name="curValue"></param>
+        /// <param name="checkValue"></param>
+        /// <param name="checkRadius"></param>
+        /// <returns></returns>
+        public static bool inRange(double curValue, double checkValue, double checkRadius) {
+            return checkValue - checkRadius < curValue && curValue < checkValue + checkRadius;
         }
 
+        protected static string l(string text) {
+            return MainForm.localize.localize(text);
+        }
 
         public float getBrightness(int R, int G, int B) {
             float r = (float)R / 255.0f;
