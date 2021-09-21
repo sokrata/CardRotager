@@ -19,7 +19,7 @@ namespace CardRotager {
         public int[] DotsVertical {
             get => Dots;
         }
-        
+
         /// <summary>
         /// Поиск точек контрастного цвета и удаление мусора (точек короче minLineSize)
         /// </summary>
@@ -27,12 +27,14 @@ namespace CardRotager {
         /// <param name="xMax"></param>
         /// <param name="yMax"></param>
         /// <param name="unmanagedImage"></param>
+        /// <param name="delLineLessSize"></param>
+        /// <param name="b"></param>
         /// <returns></returns>
-        public void fillVDotsAll(int xMin, int xMax, int yMax, UnmanagedImage unmanagedImage) {
+        public void fillVDotsAll(int xMin, int xMax, int yMax, UnmanagedImage unmanagedImage, int delLineLessSize, int ignoreXPixels) {
             Dots = new int[yMax];
             for (int y = 0; y < yMax; y++) {
                 Dots[y] = -1;
-                for (int x = xMax - 1; x >= xMin; x--) {
+                for (int x = xMax - 1 - ignoreXPixels; x >= xMin; x--) {
                     Color color = unmanagedImage.GetPixel(x, y);
                     float lightness = color.GetBrightness();
                     if (lightness >= 0 && lightness < 1) {
@@ -48,7 +50,7 @@ namespace CardRotager {
                 if (curY > 0 && inRange(curX, Dots[curY - 1], 10)) {
                     count++;
                 } else {
-                    if (count > 0 && count < DEL_LINE_LESS_HEIGHT) {
+                    if (count > 0 && count < delLineLessSize) {
                         resetDots(curY, count, curX);
                     }
                     count = 1;
@@ -72,7 +74,7 @@ namespace CardRotager {
             return radian * (180 / Math.PI);
         }
 
-        public void createVLine(StringBuilder sb, out List<Edge> angleLines2, bool debug = false) {
+        public void createVLine(StringBuilder sb, int minLineSizeX, int killLength, out List<Edge> angleLines2, bool debug = false) {
             angleLines2 = new List<Edge>();
 
             //если нет точки - пропуск
@@ -95,7 +97,7 @@ namespace CardRotager {
                     curLine = null;
                     continue;
                 }
-                if (curLine == null || !inRange(curX, curLine.X, ImageProcessor.MIN_LINE_SIZE_X)) {
+                if (curLine == null || !inRange(curX, curLine.X, minLineSizeX)) {
                     curLine = addLineEdge(LineEdges, curX, curY, false);
                     count = -1;
                 }
@@ -201,7 +203,6 @@ namespace CardRotager {
                 }
              }
 
-             const int killLength = ImageProcessor.KillLength;
              for (int curIndex = LineEdges.Count - 1; curIndex >= 0; curIndex--) {
                  Edge currentLine = LineEdges[curIndex];
                  if (currentLine.Height > killLength) {

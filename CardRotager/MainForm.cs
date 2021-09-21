@@ -7,6 +7,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CardRotager {
@@ -25,7 +27,9 @@ namespace CardRotager {
         private const int zoomIndex300percent = 13;
         private const double TOLERANCE = 0.01;
         const string openImageFileWithCardsClickHere = "Открыть файл изображения с картами (сейчас только 4 строки и 2 колонки)...\r\n(щелкните сюда)";
-
+        private Brush spotBrush;
+        private bool reloadInsteadReOpen = false;
+        
         /// <summary>
         /// Статус обработки изображения: Null - не открыт, false - открыт но не обработан, true - открыт и обработан
         /// </summary>
@@ -75,18 +79,17 @@ namespace CardRotager {
             redDashPen = new Pen(Color.Red, 5) {
                 DashPattern = dashValues
             };
+            spotBrush = new SolidBrush(Color.White);
 
             drawler = new Drawler();
         }
 
-        private void processImage() {
+        private bool processImage() {
             StringBuilder sb = new StringBuilder();
-            ip = new ImageProcessor(localize, sb, settings);
+            ip = new ImageProcessor(localize, sb, settings, statusBarProgressBar);
             Bitmap bmpDraft = ((Bitmap) pbDraft.Image);
             pbTarget.Image = null;
-
-            ip.fillHVLinesAll(bmpDraft);
-
+            bool result = ip.fillHVLinesAll(bmpDraft);
             int width = bmpDraft.Width;
             int height = bmpDraft.Height;
             using (Graphics graphics = Graphics.FromImage(bmpDraft)) {
@@ -124,7 +127,6 @@ namespace CardRotager {
                 Bitmap originalImage = (Bitmap) pbSource.Image;
                 pbTarget.Image = makeTargetImage(originalImage, rectangles, width, height, angles, sb);
 
-                tbLog.Text = sb.ToString();
                 if (!drawHelpLineOnPaint) {
                     using (Graphics originalGraphic = Graphics.FromImage(originalImage)) {
                         drawFoundContours(originalGraphic, rectangles);
@@ -135,7 +137,30 @@ namespace CardRotager {
                 pbDraft.Invalidate();
             }
 
+            tbLog.Text = sb.ToString();
             WinSpecific.clearMemory();
+            return result;
+        }
+
+        private void setProgress(bool value, string msgResult = "Обработка завершена") {
+            // statusBarProgressBar.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous;
+            // statusBarProgressBar.MarqueeAnimationSpeed = value ? 100 : 0;
+            if (value) {
+                statusBarProgressBar.Value = statusBarProgressBar.Minimum;
+            } else {
+                statusBarProgressBar.Value = statusBarProgressBar.Maximum;
+                statusBarInfo.Text = msgResult;
+            }
+
+            Application.DoEvents();
+        }
+        
+        private void resetProgress() {
+            // statusBarProgressBar.MarqueeAnimationSpeed = 0;
+            statusBarProgressBar.Style = ProgressBarStyle.Continuous;
+            statusBarProgressBar.Value = 0;
+            statusBarInfo.Text = "Начата обработка";
+            Application.DoEvents();
         }
 
         private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles, StringBuilder sb) {
@@ -159,6 +184,7 @@ namespace CardRotager {
                         angle = -angles[imageIndex];
                     }
                     copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, sb, needFlipRect);
+                    progressIncrement();
                 }
 
                 if (!drawHelpLineOnPaint) {
@@ -166,6 +192,11 @@ namespace CardRotager {
                 }
             }
             return targetImage;
+        }
+        
+        private void progressIncrement() {
+            statusBarProgressBar.Increment(1);
+            Application.DoEvents();
         }
 
         private void onPbDraftOnPaint(object sender, PaintEventArgs args) {
@@ -203,20 +234,20 @@ namespace CardRotager {
         }
 
         private void drawHLines(Graphics graphics, StringBuilder sb) {
-            if (settings.ShowHorVertLines) {
+            if (settings.ShowHorVertLines && ip.LinesAll != null) {
                 for (int colIndex = 0; colIndex < ip.LinesAll.Count; colIndex++) {
                     for (int rowIndex = 0; rowIndex < ip.LinesAll[colIndex].Count; rowIndex++) {
-                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].HLine, Pens.Goldenrod, rowIndex, sb, true, ImageProcessor.THICK);
+                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].HLine, Pens.Maroon, rowIndex, sb, true, settings.HVThickLine);
                     }
                 }
             }
         }
 
         private void drawVLines(Graphics graphics, StringBuilder sb) {
-            if (settings.ShowHorVertLines) {
+            if (settings.ShowHorVertLines && ip.LinesAll != null) {
                 for (int colIndex = 0; colIndex < ip.LinesAll.Count; colIndex++) {
                     for (int rowIndex = 0; rowIndex < ip.LinesAll[colIndex].Count; rowIndex++) {
-                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].VLine, Pens.Blue, rowIndex, sb, true, ImageProcessor.THICK);
+                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].VLine, Pens.Blue, rowIndex, sb, true, settings.HVThickLine);
                     }
                 }
             }
@@ -233,6 +264,13 @@ namespace CardRotager {
             Pen penFrame = new Pen(Color.LimeGreen, penWidth);
             if (settings.ShowImageTargetFrame) {
                 drawler.drawTargetFrame(graphics, penFrame, width, height);
+            }
+            if (string.IsNullOrEmpty(settings.CutMarkShowOnTargetImageMask)) {
+                return;
+            }
+            if (isFileMaskMatch(fileName, settings.CutMarkShowOnTargetImageMask)) {
+                Pen penCutMark = new Pen(settings.CutMarkColor, penWidth);
+                drawler.drawTargetCutMark(graphics, penCutMark, settings.CutMarkRadius);
             }
         }
 
@@ -407,10 +445,19 @@ namespace CardRotager {
             List<Rectangle> rectangles = new List<Rectangle>();
             angles = new List<float>();
             int i = 0;
+            if (LinesAll == null) {
+                sb?.AppendFormat(l("Не удалось сформировать карт, так как нет линий.\r\n"));
+                return rectangles;
+            }
             for (int hIndex = 0; hIndex < LinesAll.Count; hIndex++) {
                 for (int vIndex = 0; vIndex < LinesAll[hIndex].Count; vIndex++) {
                     Edge hLine = LinesAll[hIndex][vIndex].HLine;
                     Edge vLine = LinesAll[hIndex][vIndex].VLine;
+                    if (hLine == null || vLine == null) {
+                        sb?.AppendFormat(l("Не хватает линий для формирования {0} рамки: горизонтальная = {1}, вертикальная = {2}\r\n"), i + 1, hLine, vLine);
+                        i++;
+                        continue;
+                    }
                     int minY = min(vLine.Y, hLine.Y, hLine.Y2);
                     int maxY = vLine.Y2;
                     int minX = hLine.X;
@@ -437,7 +484,12 @@ namespace CardRotager {
 
         private bool openFile(string fileName) {
             try {
-                Image initImage = Image.FromFile(fileName);
+                Image initImage;
+                if (reloadInsteadReOpen && !string.IsNullOrEmpty(fileName) && pbSource.Image != null) {
+                    initImage = (Bitmap) pbSource.Image.Clone();
+                } else {
+                    initImage = Image.FromFile(fileName);
+                }
                 readImage(initImage);
                 this.fileName = fileName;
                 Text = fileName;
@@ -470,6 +522,10 @@ namespace CardRotager {
                 bitmap = (Bitmap) initImage;
             }
 
+            loadImage(bitmap);
+        }
+
+        private void loadImage(Bitmap bitmap) {
             pbDraft.Image = bitmap;
             pbDraft.Width = bitmap.Width;
             pbDraft.Height = bitmap.Height;
@@ -494,31 +550,44 @@ namespace CardRotager {
         }
 
         private void buttonProcess_Click(object sender, EventArgs e) {
+            reloadInsteadReOpen = true;
             workFlowImageProcessExecute();
+            reloadInsteadReOpen = false;
         }
-
-        private void workFlowImageProcessExecute() {
-            prepareProcessImageState();
+        bool processImageStep() {
             switch (imageProcessState) {
                 case null: {
-                    openPlusProcess();
-                    break;
+                    return openPlusProcess();
                 }
                 case false:
-                    processImage();
-                    break;
+                    return processImage();
                 default: {
                     if (settings.ProcessCycleF4) {
                         imageProcessState = null;
                         prepareProcessImageState();
-                        if (openPlusProcess()) {
-                            return;
-                        }
+                        return openPlusProcess();
                     }
                     break;
                 }
             }
+            return true;
+        }
 
+        private void workFlowImageProcessExecute() {
+            resetProgress();
+            prepareProcessImageState();
+            // Task task = new Task<bool>(processImageStep);
+            // task.Start();
+            setProgress(true);
+            string msg = "Обработка завершена";
+            if (!processImageStep()) {
+                msg = "Возникла ошибка при обработке";
+            }
+            // while (!task.IsCompleted) {
+            //     Application.DoEvents();
+            //     Thread.Sleep(1);
+            // }
+            setProgress(false, msg);
             postProcessImageState();
         }
 
@@ -529,11 +598,9 @@ namespace CardRotager {
             if (settings.ProcessWhenOpen) {
                 postProcessImageState();
                 prepareProcessImageState();
-                processImage();
-            } else {
-                return true;
+                return processImage();
             }
-            return false;
+            return true;
         }
 
         private bool imageOpen() {
@@ -770,7 +837,7 @@ namespace CardRotager {
                         if (settingsProcessWhenOpen) {
                             postProcessImageState();
                             prepareProcessImageState();
-                            processImage();
+                            return processImage();
                         }
                     }
                     return result;
@@ -803,7 +870,13 @@ namespace CardRotager {
         }
 
         private void menuImageOpenItem_Click(object sender, EventArgs e) {
-            openImageWithDialog(true);
+            resetProgress();
+            setProgress(true);
+            string msg = "Обработка завершена";
+            if (!openImageWithDialog(true)) {
+                msg = "Возникла ошибка при обработке";
+            }
+            setProgress(false, msg);
         }
 
         private void menuImageProcessItem_Click(object sender, EventArgs e) {
@@ -931,6 +1004,7 @@ namespace CardRotager {
 
             settings.LoadFromXml(AppSettingFileName);
             propertyGrid1.SelectedObject = settings;
+            statusBarInfo.Text = l("(Слева отображается шкала процесса обработки изображения)");
         }
 
         private void mainForm_FormClosed(object sender, FormClosedEventArgs e) {
@@ -985,6 +1059,18 @@ namespace CardRotager {
 
         private void menuZoom15Button_Click(object sender, EventArgs e) {
             zoomAll(zoomIndex15percent);
+        }
+
+        private void menuContextResetItem_Click(object sender, EventArgs e) {
+            propertyGrid1.ResetSelectedProperty();
+        }
+
+        private void pbSource_Click(object sender, MouseEventArgs e) {
+            using (Graphics g = Graphics.FromImage(pbSource.Image)) {
+                Point pt = e.Location;
+                drawler.drawRect(g, spotBrush, pt.X, pt.Y, 20);
+            }
+            pbSource.Invalidate();
         }
     }
 

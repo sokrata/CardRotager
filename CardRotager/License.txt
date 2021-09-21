@@ -1,4 +1,4 @@
-﻿License: use the code with the notification of the author. Cannot be used in commercial applications. To do this, contact the author. Author's email: sokrata@yandex.ru
-Лицензия: используйте код с уведомлением автора. Нельзя использовать в коммерческих приложениях. Для этого свяжитесь с автором. Электронная почта автора: sokrata@yandex.ru
+﻿License: use the code with the notification of the author. Cannot be used in commercial applications. You can contact the author via e-mail. Author's email: sokrata@yandex.ru (Sergey Kulish)
+Лицензия: используйте код с уведомлением автора. Нельзя использовать в коммерческих приложениях. Связаться с автором можно посредством электронной почты. Электронная почта автора: sokrata@yandex.ru  (Сергей Кулиш)
 
 license font info:  name: OpenGost Type A TT, author: Nikita Volchenkov, license: SIL Open Font License v1.10

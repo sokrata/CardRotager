@@ -82,26 +82,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Edge.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Helper\Drawler.cs" />
+    <Compile Include="Helper\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Helper\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form2.cs">
+    <Compile Include="Helper\Form2.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form2.Designer.cs">
+    <Compile Include="Helper\Form2.Designer.cs">
       <DependentUpon>Form2.cs</DependentUpon>
     </Compile>
-    <Compile Include="HelpClass.cs" />
+    <Compile Include="Helper\HelpClass.cs" />
+    <Compile Include="Helper\HSBColor.cs" />
+    <Compile Include="Helper\Localize.cs" />
+    <Compile Include="Helper\RandomColors.cs" />
     <Compile Include="Helper\UIFolderNameEditor.cs" />
-    <Compile Include="HSBColor.cs" />
+    <Compile Include="Helper\Util.cs" />
+    <Compile Include="Helper\WinSpecific.cs" />
     <Compile Include="ImageProcessor.cs" />
     <Compile Include="HVLine.cs" />
     <Compile Include="LinesDetectorBase.cs" />
     <Compile Include="LinesVDetector.cs" />
-    <Compile Include="Localize.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,16 +114,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Drawler.cs" />
-    <Compile Include="RandomColors.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Util.cs" />
     <Compile Include="LinesHDetector.cs" />
-    <Compile Include="WinSpecific.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="Helper\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form2.resx">
+    <EmbeddedResource Include="Helper\Form2.resx">
       <DependentUpon>Form2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
@@ -150,8 +150,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="code.txt" />
+    <Content Include="en-US.lng" />
+    <Content Include="Helper\code.txt" />
     <Content Include="License.txt" />
+    <Content Include="sample\test.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

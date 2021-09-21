@@ -21,14 +21,12 @@ namespace CardRotager {
             get => Dots;
         }
 
-        private List<Point> shortLines;
-
         /// <summary>
         /// Найти и заполнить все точки 
         /// с возможностью задать ограничения по Y если не заполнены startY/endY
         /// </summary>
         /// <param name="image"></param>
-        public void findHDots(UnmanagedImage image, int width, int height, int startX = -1, int endX = -1, int startY = -1, int endY = -1) {
+        public void findHDots(UnmanagedImage image, int width, int height, int delLineLessSize, int ignoreYPixels, int startX = -1, int endX = -1, int startY = -1, int endY = -1) {
             Dots = new int[width];
 
             if (startX == -1) {
@@ -45,7 +43,7 @@ namespace CardRotager {
             }
             for (int x = startX; x < endX; x++) {
                 Dots[x] = -1;
-                for (int y = startY; y < endY; y++) {
+                for (int y = startY + ignoreYPixels; y < endY; y++) {
                     Color color = image.GetPixel(x, y);
                     float lightness = color.GetBrightness();
                     if (lightness >= 0 && lightness < 1) {
@@ -54,43 +52,83 @@ namespace CardRotager {
                     }
                 }
             }
-            // int[] dt = new int[Dots.Length];
-            // Dots.CopyTo(dt, 0);
-            findShortLines(width);
-            for (int i = 0; i < shortLines.Count; i++) {
-                Point curLine = shortLines[i];
+            //сформируем shortLine (короткие линии) и если нужно их сгладим их Y во 2 части
+            //1 часть.
+            List<Point> shortLines = findShortLines(width, delLineLessSize);
+            for (int curIndex = 0; curIndex < shortLines.Count; curIndex++) {
+                Point curLine = shortLines[curIndex];
                 int prevLineDotIndex = curLine.X - 1;
                 if (prevLineDotIndex < 0) {
                     continue;
                 }
-                int prevLineY = Dots[prevLineDotIndex];
                 int nextLineDotIndex = curLine.Y + 1;
                 if (nextLineDotIndex >= Dots.Length) {
                     continue;
                 }
+                int prevLineY = Dots[prevLineDotIndex];
                 int nextLineY = Dots[nextLineDotIndex];
-                if (inRange(prevLineY, nextLineY, 10) && !inRange(curLine.X, nextLineY, 10)) {
-                    resetDots(curLine.Y, curLine.Y - curLine.X, nextLineY);
+
+                //2 часть: если для двух линий prevY и nextY не отличаются больше чем на 10 (по высоте, Y),
+                //а текущий Y дальше 10 пикселей, то заровняем текущую по nextY
+                int additionalWidth = inNearLineInRange(shortLines, curIndex, prevLineY, nextLineY, 10, 20);
+                if (additionalWidth >= 0) {
+                    //от EndX влево затрем Y новым значением nextLineY
+                    resetDots(curLine.Y, curLine.Y - curLine.X + additionalWidth, nextLineY);
                 }
             }
-            // return dt;
         }
 
-        private void findShortLines(int width) {
-            shortLines = new List<Point>();
+        private int inNearLineInRange(List<Point> shortLines, int curIndex, int prevLineY, int nextLineY, int diff, int extendSearch) {
+            int shiftX = 0;
+            Point curLine = shortLines[curIndex];
+            if (!inRange(prevLineY, nextLineY, diff)) {
+                //начнем со этой же точки т.к. она тоже подходит для зануления
+                int curDotXIndex = curLine.X - 1; // - это prevLineDotIndex
+                bool found = false;
+                while (curDotXIndex > 0 && shiftX < extendSearch) {
+                    if (inRange(Dots[curDotXIndex], nextLineY, diff)) {
+                        found = true;
+                        break;
+                    }
+                    curDotXIndex--;
+                    shiftX++;
+                }
+                if (!found) {
+                    return -1;
+                }
+            }
+            //если не дальше diff то занулять не надо, вернем -1
+            return isEdgeOfLineInRange(curLine, nextLineY, diff) ? -1 : shiftX;
+        }
+
+        /// <summary>
+        /// Проверим что Ystart или Yend в пределах diff от nextLineY
+        /// </summary>
+        /// <param name="curLine"></param>
+        /// <param name="nextLineY"></param>
+        /// <param name="diff"></param>
+        /// <returns></returns>
+        private bool isEdgeOfLineInRange(Point curLine, int nextLineY, int diff) {
+            //в x храниться начальная позиция X линии, а в Y - конечная позиция X
+            return inRange(Dots[curLine.X], nextLineY, diff) || inRange(Dots[curLine.Y], nextLineY, diff);
+        }
+
+        private List<Point> findShortLines(int width, int shortLineLen) {
+            List<Point> shortLines = new List<Point>();
             int count = 0;
             for (int curX = 0; curX < width; curX++) {
                 int curY = Dots[curX];
                 if (curX > 0 && inRange(curY, Dots[curX - 1], 10)) {
                     count++;
                 } else {
-                    if (count > 0 && count < DEL_LINE_LESS_HEIGHT) {
+                    if (count > 0 && count < shortLineLen) {
                         //resetDots(ref dots, curX, count, curY);
                         shortLines.Add(new Point(curX - count, curX - 1));
                     }
                     count = 1;
                 }
             }
+            return shortLines;
         }
 
         /// <summary>
@@ -99,19 +137,17 @@ namespace CardRotager {
         /// <param name="startX"></param>
         /// <param name="width"></param>
         /// <param name="settingsPercentHorizontalPadding"></param>
+        /// <param name="killLength"></param>
         /// <param name="angleLines2"></param>
         /// <returns></returns>
-        public void fillLineEdges(int startX, int width, int settingsPercentHorizontalPadding, out List<Edge> angleLines2) {
+        public void fillLineEdges(int startX, int width, Settings settings, out List<Edge> angleLines2) {
             const int checkRadiusY = 12;
             const int DIFF = 100;
-            makeHLines(startX, width);
+            createLineEdges(startX, width);
             angleLines2 = new List<Edge>();
             //1. сформируем список линий чтобы понять общую длину
-            //2. отберем те линии что 
-
-            if (settingsPercentHorizontalPadding != 0) {
-                
-            }
+            //2. отберем те линии что
+            
             // объединим со следующей линией (что рядом) по горизонтали, если по вертикали линии ближе чем checkRadiusY
             for (int i = LineEdges.Count - 2; i >= 0; i--) {
                 Edge curLine = LineEdges[i];
@@ -129,7 +165,7 @@ namespace CardRotager {
 
             for (int i = 0; i < LineEdges.Count; i++) {
                 Edge curLine = LineEdges[i];
-                angleLines2.Add(new Edge(curLine.calcAngle(true, settingsPercentHorizontalPadding)));
+                angleLines2.Add(new Edge(curLine.calcAngle(true, settings.PercentHorizontalPadding)));
             }
 
             for (int i = LineEdges.Count - 2; i >= 0; i--) {
@@ -164,7 +200,7 @@ namespace CardRotager {
             
             for (int lineIndex = LineEdges.Count - 1; lineIndex >= 0; lineIndex--) {
                 Edge curLine = LineEdges[lineIndex];
-                if (longestLineEdges.Contains(lineIndex) && curLine.Width > ImageProcessor.KillLength) {
+                if (longestLineEdges.Contains(lineIndex) && curLine.Width > settings.KillLength) {
                     continue;
                 }
                 LineEdges.RemoveAt(lineIndex);
@@ -177,7 +213,7 @@ namespace CardRotager {
         /// </summary>
         /// <param name="startX"></param>
         /// <param name="width"></param>
-        private void makeHLines(int startX, int width) {
+        private void createLineEdges(int startX, int width) {
             const int checkRadius = 3;
             LineEdges = new List<Edge>();
             Edge curLine = null;

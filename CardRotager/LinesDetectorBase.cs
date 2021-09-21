@@ -8,7 +8,6 @@ using System.Text;
 namespace CardRotager {
     public class LinesDetectorBase {
         
-        public const int DEL_LINE_LESS_HEIGHT = 17;
         protected int[] Dots { get; set; }
         
         protected List<Edge> LineEdges { get; set; }

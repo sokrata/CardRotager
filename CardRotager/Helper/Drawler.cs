@@ -46,9 +46,11 @@ namespace CardRotager {
         public void drawLine(Graphics graphics, Edge line, Pen red, int rowIndex, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
             sb?.AppendFormat("{0}: {1}\r\n", rowIndex + 1, line);
 
-            drawLine(graphics, line, red, thicknessLine);
-            if (withText) {
-                graphics.DrawString(string.Format("{0}, {1}", line.X, line.Y), FontTextLine, Brushes.Black, line.X, line.Y - 20);
+            if (line != null) {
+                drawLine(graphics, line, red, thicknessLine);
+                if (withText) {
+                    graphics.DrawString(string.Format("{0}, {1}", line.X, line.Y), FontTextLine, Brushes.Black, line.X, line.Y - 20);
+                }
             }
         }
 
@@ -88,17 +90,17 @@ namespace CardRotager {
             }
         }
 
-        public void drawDot(Graphics graphics, Pen red, int x, int y, int dotSide) {
-            graphics.DrawLine(red, x - dotSide, y, x + dotSide, y);
+        public void drawRect(Graphics graphics, Brush brush, int x, int y, int radiusSide) {
+            graphics.FillRectangle(brush, x - radiusSide, y - radiusSide, radiusSide * 2, radiusSide * 2);
         }
 
-        private void drawCross(Graphics graphics, int x, int y, int CrossRadius) {
-            graphics.DrawLine(Pens.Red, x - CrossRadius, y, x + CrossRadius, y);
-            graphics.DrawLine(Pens.Red, x, y - CrossRadius, x, y + CrossRadius);
+        private void drawCross(Graphics graphics, Pen pen, int x, int y, int CrossRadius) {
+            graphics.DrawLine(pen, x - CrossRadius, y, x + CrossRadius, y);
+            graphics.DrawLine(pen, x, y - CrossRadius, x, y + CrossRadius);
         }
 
         const int X1 = 500;
-        const int X2 = 4961;
+        const int X2 = 4820;//961;
         const int X3 = 9129;
         const int Y1 = 364;
         const int Y2 = 3474;
@@ -138,6 +140,19 @@ namespace CardRotager {
             gr.DrawLine(penFrame, 0, Y3, Width, Y3);
             gr.DrawLine(penFrame, 0, Y4, Width, Y4);
             gr.DrawLine(penFrame, 0, Y5, Width, Y5);
+        }
+        public void drawTargetCutMark(Graphics gr, Pen penCutMark, int crossRadius) {
+            drawLineCross(gr, penCutMark, Y1, crossRadius);
+            drawLineCross(gr, penCutMark, Y2, crossRadius);
+            drawLineCross(gr, penCutMark, Y3, crossRadius);
+            drawLineCross(gr, penCutMark, Y4, crossRadius);
+            drawLineCross(gr, penCutMark, Y5, crossRadius);
+        }
+
+        private void drawLineCross(Graphics gr, Pen penFrame, int y1, int crossRadius) {
+            drawCross(gr, penFrame, X1, y1, crossRadius);
+            drawCross(gr, penFrame, X2, y1, crossRadius);
+            drawCross(gr, penFrame, X3, y1, crossRadius);
         }
 
         public void drawRect(Graphics graphics, List<Rectangle> rectangles) {

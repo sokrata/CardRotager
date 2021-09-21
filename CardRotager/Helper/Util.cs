@@ -66,14 +66,22 @@ namespace CardRotager {
             int charIndex = 0;
             int a = 255;
             if (s.Length == 8) {
-                a = int.Parse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+                if (!int.TryParse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out a)) {
+                    return Color.Transparent;
+                }
                 charIndex += 2;
             }
-            int r = int.Parse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+            if (!int.TryParse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int r)) {
+                return Color.Transparent;
+            }
             charIndex += 2;
-            int g = int.Parse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+            if (!int.TryParse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int g)) {
+                return Color.Transparent;
+            }
             charIndex += 2;
-            int b = int.Parse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+            if (!int.TryParse(s.Substring(charIndex, 2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int b)) {
+                return Color.Transparent;
+            }
             return Color.FromArgb(a, r, g, b);
         }
 
