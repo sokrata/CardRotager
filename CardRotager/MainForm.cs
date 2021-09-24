@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -159,7 +160,7 @@ namespace CardRotager {
             // statusBarProgressBar.MarqueeAnimationSpeed = 0;
             statusBarProgressBar.Style = ProgressBarStyle.Continuous;
             statusBarProgressBar.Value = 0;
-            WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.NORMAL);
+            WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int) WinSpecific.ProgressBarState.NORMAL);
             statusBarInfo.BackColor = SystemColors.Control;
             statusBarInfo.Text = "Начата обработка";
             Application.DoEvents();
@@ -167,8 +168,15 @@ namespace CardRotager {
 
         private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles, StringBuilder sb) {
             const int EXTEND_SIDE = 50;
+            const int EXT_WIDTH = 300;
+            const int EXT_HEIGHT = 300;
+            const int WIDTH_8_8_CM = 4160 + EXT_WIDTH; //px
+            const int HEIGHT_6_3_CM = 2965 + EXT_HEIGHT; //px
             Bitmap targetImage = createEmptyBitmapSource(width, height, fromImage);
             using (Graphics toGraphics = Graphics.FromImage(targetImage)) {
+                int cardWidth = Math.Max(fromRectList.Max(a => a.Width), WIDTH_8_8_CM);
+                int cardHeight = Math.Max(fromRectList.Max(a => a.Height), HEIGHT_6_3_CM);
+                drawler.calcFrame(width, height, cardWidth, cardHeight);
                 List<Rectangle> toRectList = drawler.makeFrame();
                 toGraphics.Clear(Color.White);
                 bool needFlipRect = isNeedFlipRect();
@@ -190,12 +198,12 @@ namespace CardRotager {
                 }
 
                 if (!drawHelpLineOnPaint) {
-                    drawTargetFrame(toGraphics, width, height);
+                    drawTargetFrame(toGraphics);
                 }
             }
             return targetImage;
         }
-        
+
         private void progressIncrement() {
             statusBarProgressBar.Increment(1);
             Application.DoEvents();
@@ -231,7 +239,7 @@ namespace CardRotager {
             }
             Graphics graphics = args.Graphics;
             Image image = (sender as PictureBox).Image;
-            drawTargetFrame(graphics, image.Width, image.Height);
+            // drawTargetFrame(graphics, image.Width, image.Height);
             drawRuler(graphics, image.Width, image.Height);
         }
 
@@ -261,11 +269,11 @@ namespace CardRotager {
             }
         }
 
-        private void drawTargetFrame(Graphics graphics, int width, int height) {
+        private void drawTargetFrame(Graphics graphics) {
             const int penWidth = 7;
             Pen penFrame = new Pen(Color.LimeGreen, penWidth);
             if (settings.ShowImageTargetFrame) {
-                drawler.drawTargetFrame(graphics, penFrame, width, height);
+                drawler.drawTargetFrame(graphics, penFrame);
             }
             if (string.IsNullOrEmpty(settings.CutMarkShowOnTargetImageMask)) {
                 return;
