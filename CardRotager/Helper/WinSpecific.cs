@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CardRotager {
     public static class WinSpecific {
@@ -147,5 +148,18 @@ namespace CardRotager {
             GC.Collect();
             EmptyWorkingSet(Process.GetCurrentProcess().Handle);
         }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr w, IntPtr l);
+        public static void SetState(ProgressBar pBar, int state) {
+            SendMessage(pBar.Handle, 1040, (IntPtr)state, IntPtr.Zero);
+        }
+
+        public enum ProgressBarState {
+            NORMAL = 1,// (green);
+            ERROR = 2, // (red);
+            WARNING = 3 // (yellow).
+        }
+
     }
 }

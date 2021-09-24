@@ -159,6 +159,8 @@ namespace CardRotager {
             // statusBarProgressBar.MarqueeAnimationSpeed = 0;
             statusBarProgressBar.Style = ProgressBarStyle.Continuous;
             statusBarProgressBar.Value = 0;
+            WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.NORMAL);
+            statusBarInfo.BackColor = SystemColors.Control;
             statusBarInfo.Text = "Начата обработка";
             Application.DoEvents();
         }
@@ -591,6 +593,8 @@ namespace CardRotager {
             string msg = "Обработка завершена";
             if (!processImageStep()) {
                 msg = "Возникла ошибка при обработке";
+                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.ERROR);
+                statusBarInfo.BackColor = Color.Red;
             }
             // while (!task.IsCompleted) {
             //     Application.DoEvents();
@@ -884,6 +888,8 @@ namespace CardRotager {
             string msg = "Обработка завершена";
             if (!openImageWithDialog(true)) {
                 msg = "Возникла ошибка при обработке";
+                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.ERROR);
+                statusBarInfo.BackColor = Color.Red;
             }
             setProgress(false, msg);
         }
