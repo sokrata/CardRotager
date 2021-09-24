@@ -99,17 +99,51 @@ namespace CardRotager {
             graphics.DrawLine(pen, x, y - CrossRadius, x, y + CrossRadius);
         }
 
-        const int X1 = 500;
-        const int X2 = 4820;//961;
-        const int X3 = 9129;
-        const int Y1 = 364;
-        const int Y2 = 3474;
-        const int Y3 = 6561;
-        const int Y4 = 9760;
-        const int Y5 = 12959;
+        private int paddingHor;
+        private int paddingVert;
+        private int X1;
+        private int X2;
+        private int X3;
+        private int Y1;
+        private int Y2;
+        private int Y3;
+        private int Y4;
+        private int Y5;
+        private int imageWidth;
+        private int imageHeight;
+        private int cardWidth;
+        private int cardHeight;
+        
+        public void calcFrame(int imageWidth, int imageHeight, int cardWidth, int cardHeight) {
+            this.imageWidth = imageWidth;
+            this.imageHeight = imageHeight;
+            this.cardWidth = cardWidth;
+            this.cardHeight = cardHeight;
+            paddingHor = (imageWidth - cardWidth * 2) / 2;
+            paddingVert = (imageHeight - cardHeight * 4) / 2;
+            X1 = paddingHor;
+            X2 = imageWidth / 2;
+            X3 = imageWidth - paddingHor;
+            Y1 = paddingVert;
+            Y2 = paddingVert + cardHeight;
+            Y3 = paddingVert + cardHeight * 2;
+            Y4 = paddingVert + cardHeight * 3;
+            Y5 = imageHeight - paddingVert;
+        }
+        // const int X1 = 500;
+        // const int X2 = 4961;
+        // const int X3 = 9129;
+        // const int Y1 = 364;
+        // const int Y2 = 3474;
+        // const int Y3 = 6561;
+        // const int Y4 = 9760;
+        // const int Y5 = 12959;
 
         public List<Rectangle> makeFrame() {
-            List<Rectangle> rects = new List<Rectangle> {
+           
+            
+            List<Rectangle> rects = new List<Rectangle>() {
+            
                 //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
                 //first colunm:
                 new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)),
@@ -131,15 +165,15 @@ namespace CardRotager {
                 gr.DrawRectangle(penFrame, item);
             }
         }
-        public void drawTargetFrame(Graphics gr, Pen penFrame, int Width, int Height) {
-            gr.DrawLine(penFrame, X1, 0, X1, Height);
-            gr.DrawLine(penFrame, X2, 0, X2, Height);
-            gr.DrawLine(penFrame, X3, 0, X3, Height);
-            gr.DrawLine(penFrame, 0, Y1, Width, Y1);
-            gr.DrawLine(penFrame, 0, Y2, Width, Y2);
-            gr.DrawLine(penFrame, 0, Y3, Width, Y3);
-            gr.DrawLine(penFrame, 0, Y4, Width, Y4);
-            gr.DrawLine(penFrame, 0, Y5, Width, Y5);
+        public void drawTargetFrame(Graphics gr, Pen penFrame) {
+            gr.DrawLine(penFrame, X1, 0, X1, imageHeight);
+            gr.DrawLine(penFrame, X2, 0, X2, imageHeight);
+            gr.DrawLine(penFrame, X3, 0, X3, imageHeight);
+            gr.DrawLine(penFrame, 0, Y1, imageWidth, Y1);
+            gr.DrawLine(penFrame, 0, Y2, imageWidth, Y2);
+            gr.DrawLine(penFrame, 0, Y3, imageWidth, Y3);
+            gr.DrawLine(penFrame, 0, Y4, imageWidth, Y4);
+            gr.DrawLine(penFrame, 0, Y5, imageWidth, Y5);
         }
         public void drawTargetCutMark(Graphics gr, Pen penCutMark, int crossRadius) {
             drawLineCross(gr, penCutMark, Y1, crossRadius);
@@ -149,10 +183,10 @@ namespace CardRotager {
             drawLineCross(gr, penCutMark, Y5, crossRadius);
         }
 
-        private void drawLineCross(Graphics gr, Pen penFrame, int y1, int crossRadius) {
-            drawCross(gr, penFrame, X1, y1, crossRadius);
-            drawCross(gr, penFrame, X2, y1, crossRadius);
-            drawCross(gr, penFrame, X3, y1, crossRadius);
+        private void drawLineCross(Graphics gr, Pen penFrame, int Y, int crossRadius) {
+            drawCross(gr, penFrame, X1, Y, crossRadius);
+            drawCross(gr, penFrame, X2, Y, crossRadius);
+            drawCross(gr, penFrame, X3, Y, crossRadius);
         }
 
         public void drawRect(Graphics graphics, List<Rectangle> rectangles) {
