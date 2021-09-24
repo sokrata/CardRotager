@@ -33,7 +33,7 @@ namespace CardRotager {
         
         
         private const string xmlLastFileName = "lastFileName";
-        private const string xmlSaveEachRectanglePath = "saveEachRectanglePath";
+        private const string xmlSaveEachRectangleFileName = "saveEachRectangleFileName";
         private const string xmlCustomSavePath = "customSavePath";
         private const string xmlConvertOpenImage = "convertOpenImage";
         private const string xmlRotateSubImages = "rotateSubImages";
@@ -312,10 +312,10 @@ namespace CardRotager {
 
         [Browsable(true)]
         [Category(debug)]
-        [Description("Путь к папке для сохранения найденных карт на картинке (имя img<номер карты>.bmp). Если не заполнено, не сохраняется")]
-        [DisplayName("SaveEachRectanglePath")]
+        [Description("Путь к папке и имя для сохранения найденных карт на картинке (пример: c:\\temp\\{fno}\\img{#}.bmp). Доступны автозамены: {#} на <номер карты>, {fn} на имя главного файла, {fno} на имя глав.файла без расширения и точки. Вместо bmp можно подставить расширения jpg, png, tif. Если не заполнено, не сохраняется")]
+        [DisplayName("SaveEachRectangleFileName")]
         [EditorAttribute(typeof(UIFolderNameEditor), typeof(UITypeEditor))]
-        public string SaveEachRectanglePath { get; set; }
+        public string SaveEachRectangleFileName { get; set; }
         
         [Browsable(true)]
         [Category(main)]
@@ -336,7 +336,7 @@ namespace CardRotager {
                 return;
             }
             LastOpenFileName = element.GetAttribute(xmlLastFileName);
-            SaveEachRectanglePath = element.GetAttribute(xmlSaveEachRectanglePath);
+            SaveEachRectangleFileName = element.GetAttribute(xmlSaveEachRectangleFileName);
             CustomSavePath = element.GetAttribute(xmlCustomSavePath);
             FlipHorizontalEachRectFileMask = element.GetAttribute(xmlFlipHorizontalEachRectFileMask);
             if (bool.TryParse(element.GetAttribute(xmlConvertOpenImage), out bool cb)) {
@@ -433,7 +433,7 @@ namespace CardRotager {
             XmlNode xmlRoot = xmlDoc.DocumentElement.SelectSingleNode("/settings");
             XmlElement xmlNode = ((XmlElement) xmlRoot);
             xmlNode.SetAttribute(xmlLastFileName, LastOpenFileName);
-            xmlNode.SetAttribute(xmlSaveEachRectanglePath, SaveEachRectanglePath);
+            xmlNode.SetAttribute(xmlSaveEachRectangleFileName, SaveEachRectangleFileName);
             xmlNode.SetAttribute(xmlCustomSavePath, CustomSavePath);
             xmlNode.SetAttribute(xmlRotateSubImages, RotateFoundSubImages.ToString());
             xmlNode.SetAttribute(xmlConvertOpenImage, ConvertOpenImage.ToString());

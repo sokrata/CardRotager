@@ -93,7 +93,7 @@ namespace CardRotager {
         }
 
 
-        private void saveToNonIndexedImageFormat(System.Drawing.Image image, string fileName) {
+        private void saveToNonIndexedImageFormat(Image image, string fileName) {
             Bitmap bitmap;
             using (var bitmap1 = image) {
                 MemoryStream ms = new MemoryStream();

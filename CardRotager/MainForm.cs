@@ -350,9 +350,18 @@ namespace CardRotager {
                     rotatedGraphic.FillRectangle(settings.CropFillBrush, cropRight);
                     string saveSubImageFileName = null;
                     try {
-                        saveSubImageFileName = Path.Combine(settings.SaveEachRectanglePath, string.Format("img{0}.bmp", imageIndex + 1));
-                        if (!string.IsNullOrWhiteSpace(settings.SaveEachRectanglePath)) {
-                            rotatedBitmap.Save(saveSubImageFileName);
+                        if (!string.IsNullOrWhiteSpace(settings.SaveEachRectangleFileName)) {
+                            string fn = Path.GetFileName(fileName);
+                            string fnOnly = Path.GetFileNameWithoutExtension(fileName);
+                            saveSubImageFileName = Path.Combine(settings.SaveEachRectangleFileName).Replace("{#}", (imageIndex + 1).ToString()).Replace("{fn}",fn).Replace("{fno}",fnOnly);
+                            string folderPath = Path.GetDirectoryName(saveSubImageFileName);
+                            string extension = Path.GetExtension(saveSubImageFileName).ToLower();
+                            int filterIndex = getFilterByExt(extension);
+                            ImageFormat imageFormat = getFilterByIndex(filterIndex);
+                            if (!Directory.Exists(folderPath)) {
+                                Directory.CreateDirectory(folderPath);
+                            }
+                            rotatedBitmap.Save(saveSubImageFileName, imageFormat);
                         }
                     } catch (Exception ex) {
                         string stError = string.Format("Не удалось сохранить файл: {0}\r\n{1}", saveSubImageFileName, ex.Message);
@@ -924,7 +933,7 @@ namespace CardRotager {
             }
         }
 
-        private static int getFilterByExt(string extension) {
+        public static int getFilterByExt(string extension) {
             switch (extension) {
                 default:
                 case ".bmp":
@@ -945,7 +954,7 @@ namespace CardRotager {
             }
         }
 
-        private static ImageFormat getFilterByIndex(int filterIndex) {
+        public static ImageFormat getFilterByIndex(int filterIndex) {
             switch (filterIndex) {
                 default:
                 case 3:
