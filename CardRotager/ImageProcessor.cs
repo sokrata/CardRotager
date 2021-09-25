@@ -244,7 +244,9 @@ namespace CardRotager {
                 if (hLines.Count != 1) {
                     log.AppendFormat("число строк не равно 1 (hLines.Count = {0}, rowIndex = {1}\r\n", hLines.Count, rowIndex + 1);
                 }
-                log.AppendFormat("{0}: {1}\r\n", rowIndex + 1, hLines[0]);
+                if (hLines.Count > 0) {
+                    log.AppendFormat("{0}: {1}\r\n", rowIndex + 1, hLines[0]);
+                }
             }
             return hLines;
         }

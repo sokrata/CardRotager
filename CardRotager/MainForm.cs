@@ -853,8 +853,7 @@ namespace CardRotager {
 
         private bool openImageWithDialog(bool settingsProcessWhenOpen) {
             using (OpenFileDialog ofd = new OpenFileDialog()) {
-                ofd.Filter =
-                    l("Графический файл (*.jpg, *.jpeg, *.jpe, *.jfif, *.tif, *.tiff, *.png, *.bmp)|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.tif;*.tiff;*.png;*.bmp|Все файлы (*.*)|*.*");
+                ofd.Filter = l("Графический файл (*.jpg, *.jpeg, *.jpe, *.jfif, *.tif, *.tiff, *.png, *.bmp)|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.tif;*.tiff;*.png;*.bmp|Все файлы (*.*)|*.*");
                 if (!string.IsNullOrEmpty(fileName)) {
                     ofd.FileName = Path.GetFileName(fileName);
                     ofd.InitialDirectory = Path.GetDirectoryName(fileName);
@@ -912,10 +911,6 @@ namespace CardRotager {
                 statusBarInfo.BackColor = Color.Red;
             }
             setProgress(false, msg);
-        }
-
-        private void menuImageProcessItem_Click(object sender, EventArgs e) {
-            workFlowImageProcessExecute();
         }
 
         private void saveTextForTranslateToolStripMenuItem_Click(object sender, EventArgs e) {

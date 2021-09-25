@@ -418,7 +418,7 @@ namespace CardRotager {
             this.menuImageProcessItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
             this.menuImageProcessItem.Size = new System.Drawing.Size(362, 30);
             this.menuImageProcessItem.Text = "Обр&аботка";
-            this.menuImageProcessItem.Click += new System.EventHandler(this.menuImageProcessItem_Click);
+            this.menuImageProcessItem.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // toolStripMenuItem2
             // 
