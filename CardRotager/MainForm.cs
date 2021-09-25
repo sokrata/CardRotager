@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CardRotager {
@@ -30,7 +28,7 @@ namespace CardRotager {
         const string openImageFileWithCardsClickHere = "Открыть файл изображения с картами (сейчас только 4 строки и 2 колонки)...\r\n(щелкните сюда)";
         private Brush spotBrush;
         private bool reloadInsteadReOpen = false;
-        
+
         /// <summary>
         /// Статус обработки изображения: Null - не открыт, false - открыт но не обработан, true - открыт и обработан
         /// </summary>
@@ -155,7 +153,7 @@ namespace CardRotager {
 
             Application.DoEvents();
         }
-        
+
         private void resetProgress() {
             // statusBarProgressBar.MarqueeAnimationSpeed = 0;
             statusBarProgressBar.Style = ProgressBarStyle.Continuous;
@@ -168,8 +166,8 @@ namespace CardRotager {
 
         private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles, StringBuilder sb) {
             const int EXTEND_SIDE = 50;
-            const int EXT_WIDTH = 300;
-            const int EXT_HEIGHT = 300;
+            const int EXT_WIDTH = 150;
+            const int EXT_HEIGHT = 150;
             const int WIDTH_8_8_CM = 4160 + EXT_WIDTH; //px
             const int HEIGHT_6_3_CM = 2965 + EXT_HEIGHT; //px
             Bitmap targetImage = createEmptyBitmapSource(width, height, fromImage);
@@ -180,11 +178,11 @@ namespace CardRotager {
                 List<Rectangle> toRectList = drawler.makeFrame();
                 toGraphics.Clear(Color.White);
                 bool needFlipRect = isNeedFlipRect();
+                Brush cropFillBrush = new SolidBrush(settings.CropPaddingColor);
                 // for (int imageIndex = 0; imageIndex < fromRectList.Count; imageIndex++) {
                 //     fromRectList[imageIndex].Inflate(new Size(EXTEND_SIDE, EXTEND_SIDE));
                 // }
                 for (int imageIndex = 0; imageIndex < toRectList.Count; imageIndex++) {
-                    
                     if (imageIndex >= fromRectList.Count) {
                         break;
                     }
@@ -193,7 +191,7 @@ namespace CardRotager {
                     if (settings.RotateFoundSubImages) {
                         angle = -angles[imageIndex];
                     }
-                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, sb, needFlipRect);
+                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, sb, needFlipRect, cropFillBrush);
                     progressIncrement();
                 }
 
@@ -331,7 +329,7 @@ namespace CardRotager {
         }
 
         public void copyRegionIntoImage(Graphics toGraphic, Bitmap fromBitmap, int imageIndex, List<Rectangle> toRegionList, List<Rectangle> fromRegionList,
-            float angle, int extend, StringBuilder sb, bool needFlipRect) {
+            float angle, int extend, StringBuilder sb, bool needFlipRect, Brush cropFillBrush) {
             Rectangle fromRegion = fromRegionList[imageIndex];
             Rectangle toRegion = toRegionList[imageIndex];
             //увеличим на запас (защита от скоса сторон картинки)
@@ -356,14 +354,15 @@ namespace CardRotager {
                     Rectangle cropRight = new Rectangle(rotatedBitmap.Width - settings.CropPaddingRight, 0, settings.CropPaddingRight, rotatedBitmap.Height);
                     // fromRegion.Width -= settings.CropPaddingRight;
                     // fromRegion.Height -= settings.CropPaddingTop + shiftY;
-                    rotatedGraphic.FillRectangle(settings.CropFillBrush, cropTop);
-                    rotatedGraphic.FillRectangle(settings.CropFillBrush, cropRight);
+                    rotatedGraphic.FillRectangle(cropFillBrush, cropTop);
+                    rotatedGraphic.FillRectangle(cropFillBrush, cropRight);
                     string saveSubImageFileName = null;
                     try {
                         if (!string.IsNullOrWhiteSpace(settings.SaveEachRectangleFileName)) {
                             string fn = Path.GetFileName(fileName);
                             string fnOnly = Path.GetFileNameWithoutExtension(fileName);
-                            saveSubImageFileName = Path.Combine(settings.SaveEachRectangleFileName).Replace("{#}", (imageIndex + 1).ToString()).Replace("{fn}",fn).Replace("{fno}",fnOnly);
+                            saveSubImageFileName = Path.Combine(settings.SaveEachRectangleFileName).Replace("{#}", (imageIndex + 1).ToString()).Replace("{fn}", fn)
+                                .Replace("{fno}", fnOnly);
                             string folderPath = Path.GetDirectoryName(saveSubImageFileName);
                             string extension = Path.GetExtension(saveSubImageFileName).ToLower();
                             int filterIndex = getFilterByExt(extension);
@@ -573,6 +572,7 @@ namespace CardRotager {
             workFlowImageProcessExecute();
             reloadInsteadReOpen = false;
         }
+
         bool processImageStep() {
             switch (imageProcessState) {
                 case null: {
@@ -601,7 +601,7 @@ namespace CardRotager {
             string msg = "Обработка завершена";
             if (!processImageStep()) {
                 msg = "Возникла ошибка при обработке";
-                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.ERROR);
+                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int) WinSpecific.ProgressBarState.ERROR);
                 statusBarInfo.BackColor = Color.Red;
             }
             // while (!task.IsCompleted) {
@@ -625,7 +625,7 @@ namespace CardRotager {
         }
 
         private bool imageOpen() {
-            if (fileName == null) {
+            if (string.IsNullOrEmpty(fileName)) {
                 if (!openImageWithDialog(false)) {
                     resetImageState();
                 }
@@ -896,7 +896,7 @@ namespace CardRotager {
             string msg = "Обработка завершена";
             if (!openImageWithDialog(true)) {
                 msg = "Возникла ошибка при обработке";
-                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int)WinSpecific.ProgressBarState.ERROR);
+                WinSpecific.SetState(statusBarProgressBar.ProgressBar, (int) WinSpecific.ProgressBarState.ERROR);
                 statusBarInfo.BackColor = Color.Red;
             }
             setProgress(false, msg);
@@ -932,7 +932,7 @@ namespace CardRotager {
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = l("Графический файл (*.jpg)|*.jpg|Графический файл (*.png)|*.png|Графический файл (*.tiff)|*.tiff|Графический файл (*.bmp)|*.bmp");
-            if (fileName != null) {
+            if (!string.IsNullOrEmpty(fileName)) {
                 string extension = Path.GetExtension(fileName).ToLower();
                 saveFileDialog.FilterIndex = getFilterByExt(extension);
                 saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
@@ -1012,7 +1012,7 @@ namespace CardRotager {
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = l("Графический файл (*.bmp)|*.bmp");
-            if (fileName != null) {
+            if (!string.IsNullOrEmpty(fileName)) {
                 saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
                 saveFileDialog.FileName = Path.ChangeExtension(Path.GetFileName(fileName), ".draft.bmp");
             }
@@ -1026,7 +1026,8 @@ namespace CardRotager {
             localize.localizeControlAll(this);
 
             settings.LoadFromXml(AppSettingFileName);
-            propertyGrid1.SelectedObject = settings;
+            propertyGrid1.SelectedObject = settings.PropertyObject;
+            propertyGrid1.Refresh();
             statusBarInfo.Text = l("(Слева отображается шкала процесса обработки изображения)");
         }
 

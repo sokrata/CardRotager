@@ -57,7 +57,7 @@ namespace CardRotager {
         }
 
         /// <summary>
-        ///  //ColorTranslator.FromHtml(htmlColor); // Color.FromArgb(HtmlColorToArgb(htmlColor));
+        ///  использую для свойств ColorTranslator.FromHtml(htmlColor), т.к. этот вариант не дает KnownColor для отображения текста в PropertyGrid
         /// </summary>
         /// <param name="htmlColor"></param>
         /// <returns></returns>
@@ -90,7 +90,7 @@ namespace CardRotager {
         /// </summary>
         /// <param name="color"></param>
         /// <returns></returns>
-        public static string ToHtml(System.Drawing.Color color) {
+        public static string ToHtml(Color color) {
             return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", color.A, color.R, color.G, color.B);
             //return ColorTranslator.ToHtml(color);
         }
