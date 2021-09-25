@@ -183,10 +183,10 @@ namespace CardRotager {
             drawLineCross(gr, penCutMark, Y5, crossRadius);
         }
 
-        private void drawLineCross(Graphics gr, Pen penFrame, int Y, int crossRadius) {
-            drawCross(gr, penFrame, X1, Y, crossRadius);
-            drawCross(gr, penFrame, X2, Y, crossRadius);
-            drawCross(gr, penFrame, X3, Y, crossRadius);
+        private void drawLineCross(Graphics gr, Pen penFrame, int yPos, int crossRadius) {
+            drawCross(gr, penFrame, X1, yPos, crossRadius);
+            drawCross(gr, penFrame, X2, yPos, crossRadius);
+            drawCross(gr, penFrame, X3, yPos, crossRadius);
         }
 
         public void drawRect(Graphics graphics, List<Rectangle> rectangles) {

@@ -10,10 +10,10 @@ namespace CardRotager {
         private const int CROP_PADDING_TOP = 80;
         private const int CROP_PADDING_RIGHT = 80;
         private const int PERCENT_HOR_PADDING = 10;
-        private static readonly Color CROP_FILL_COLOR = Color.White;
-        private static readonly Color CUT_MARK_COLOR = Color.Gray;
-        private const int cutMarkRadius = 40;
-        private const int cutMarkThick = 7;
+        private static readonly Color CROP_FILL_COLOR = Color.White; //в конструкторе присваивает это DefaultValue и не смотрите в DefaultValue свойства - там заглушка
+        private static readonly Color CUT_MARK_COLOR = Color.Gray; //в конструкторе присваивает это DefaultValue и не смотрите в DefaultValue свойства - там заглушка
+        private const int CUT_MARK_RADIUS = 80;
+        private const int CUT_MARK_THICK = 7;
 
         private const int KILL_LENGTH = 140;
 
@@ -28,7 +28,8 @@ namespace CardRotager {
         private const int DEL_LINE_LESS_SIZE = 27;
         private const int IGNORE_FIRST_Y_PIXELS = 0;
         private const int DOTLINE_Y_CUR_MIN_ADD_HEIGHT = 200;
-        
+        private const bool CONVERT_OPEN_IMAGE = true;
+
         private const int DOTLINE_X_MIN_ADD_WIDTH = 100;
         
         
@@ -87,8 +88,8 @@ namespace CardRotager {
             MinLineSizeY = MIN_LINE_SIZE_Y;
             HVThickLine = THICK;
             KillLength = KILL_LENGTH;
-            
-            ConvertOpenImage = true;
+
+            ConvertOpenImage = CONVERT_OPEN_IMAGE;
             LastOpenFileName = "";
             RotateFoundSubImages = false;
             ProcessCycleF4 = false;
@@ -101,8 +102,11 @@ namespace CardRotager {
             ProcessWhenOpen = false;
             CutMarkShowOnTargetImageMask = "";
             CutMarkColor = CUT_MARK_COLOR;
-            CutMarkRadius = cutMarkRadius;
-            CutMarkThick = cutMarkThick;
+            CutMarkRadius = CUT_MARK_RADIUS;
+            CutMarkThick = CUT_MARK_THICK;
+
+            PropertyGridHelper.setDefaultColor(this,"CropFillColor",CROP_FILL_COLOR);
+            PropertyGridHelper.setDefaultColor(this,"CutMarkColor",CUT_MARK_COLOR);
         }
 
         [Browsable(true)]
@@ -248,44 +252,49 @@ namespace CardRotager {
         [Category(process)]
         [Description("Цвет точки реза (если задан параметр CutMarkShowOnTargetImageMask)")]
         [DisplayName("CutMarkColor")]
+        [DefaultValue(typeof(Color), "Gray")]
         public Color CutMarkColor { get; set; }
         
         [Browsable(true)]
         [Category(process)]
         [Description("Радиус луча для точки реза (если задан параметр CutMarkShowOnTargetImageMask)")]
         [DisplayName("CutMarkRadius")]
-        [DefaultValue(cutMarkRadius)]
+        [DefaultValue(CUT_MARK_RADIUS)]
         public int CutMarkRadius { get; set; }
         
         [Browsable(true)]
         [Category(process)]
         [Description("Толщина линий для точек реза (если задан параметр CutMarkShowOnTargetImageMask)")]
         [DisplayName("CutMarkThick")]
-        [DefaultValue(cutMarkThick)]
+        [DefaultValue(CUT_MARK_THICK)]
         public int CutMarkThick { get; set; }
 
         [Browsable(true)]
         [Category(debug)]
         [Description("При открытии сразу обработать")]
         [DisplayName("ProcessWhenOpen")]
+        [DefaultValue(CONVERT_OPEN_IMAGE)]
         public bool ProcessWhenOpen { get; set; }
 
         [Browsable(true)]
         [Category(main)]
         [Description("Обрезать сверху карту (после поворота)")]
         [DisplayName("CropPaddingTop")]
+        [DefaultValue(CROP_PADDING_TOP)]
         public int CropPaddingTop { get; set; }
 
         [Browsable(true)]
         [Category(main)]
         [Description("Обрезать справа карту (после поворота)")]
         [DisplayName("CropPaddingRight")]
+        [DefaultValue(CROP_PADDING_RIGHT)]
         public int CropPaddingRight { get; set; }
 
         [Browsable(true)]
         [Category(main)]
         [Description("Цвет заполнения для обрезки карты (после поворота)")]
         [DisplayName("CropPaddingColor")]
+        [DefaultValue(typeof(Color), "White")]
         public Color CropFillColor {
             get => cropFillColor;
             set {
@@ -308,6 +317,7 @@ namespace CardRotager {
         [Description("Путь и имя последнего открытого файла")]
         [DisplayName("LastOpenFileName")]
         [EditorAttribute(typeof(UIFolderNameEditor), typeof(UITypeEditor))]
+        [DefaultValue("")]
         public string LastOpenFileName { get; set; }
 
         [Browsable(true)]
@@ -315,6 +325,7 @@ namespace CardRotager {
         [Description("Путь к папке и имя для сохранения найденных карт на картинке (пример: c:\\temp\\{fno}\\img{#}.bmp). Доступны автозамены: {#} на <номер карты>, {fn} на имя главного файла, {fno} на имя глав.файла без расширения и точки. Вместо bmp можно подставить расширения jpg, png, tif. Если не заполнено, не сохраняется")]
         [DisplayName("SaveEachRectangleFileName")]
         [EditorAttribute(typeof(UIFolderNameEditor), typeof(UITypeEditor))]
+        [DefaultValue("")]
         public string SaveEachRectangleFileName { get; set; }
         
         [Browsable(true)]
@@ -322,6 +333,7 @@ namespace CardRotager {
         [Description("Путь к папке для сохранения. Если не заполнено, используется путь предлагаемый диалогом Windows")]
         [DisplayName("CustomSavePath")]
         [EditorAttribute(typeof(UIFolderNameEditor), typeof(UITypeEditor))]
+        [DefaultValue("")]
         public string CustomSavePath { get; set; }
 
         public void LoadFromXml(string fileName) {
