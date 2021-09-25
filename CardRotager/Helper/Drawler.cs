@@ -4,10 +4,10 @@ using System.Text;
 
 namespace CardRotager {
     public class Drawler {
-
         const int penWidth = 7;
         Pen penFuchsia = new Pen(Color.Fuchsia, penWidth);
-        
+        private StringFormat headerStringFormat;
+
         /// <summary>
         /// Размер шрифта для текста
         /// </summary>
@@ -15,6 +15,9 @@ namespace CardRotager {
 
         public Drawler() {
             FontTextLine = new Font("Arial", 120);
+            headerStringFormat = new StringFormat(StringFormatFlags.FitBlackBox);
+            headerStringFormat.LineAlignment = StringAlignment.Center;
+            headerStringFormat.Alignment = StringAlignment.Center;
         }
 
         public void drawRuler(Graphics graphics, int width, int height) {
@@ -33,6 +36,7 @@ namespace CardRotager {
         }
 
         private StringFormat sf = new StringFormat(StringFormatFlags.DirectionVertical);
+
         private void drawHLineWithText(Graphics graphics, int y, int lineLen, int width) {
             graphics.DrawLine(Pens.Green, width - lineLen, y, width, y);
             graphics.DrawString(y.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, width - lineLen, y, sf);
@@ -43,8 +47,8 @@ namespace CardRotager {
             graphics.DrawString(x.ToString(), SystemFonts.MessageBoxFont, SystemBrushes.ControlText, x + 2, 0);
         }
 
-        public void drawLine(Graphics graphics, Edge line, Pen red, int rowIndex, StringBuilder sb, bool withText = false, int thicknessLine = 0) {
-            sb?.AppendFormat("{0}: {1}\r\n", rowIndex + 1, line);
+        public void drawLine(Graphics graphics, Edge line, Pen red, int rowIndex, Logger log, bool withText = false, int thicknessLine = 0) {
+            log.AppendFormat("{0}: {1}\r\n", rowIndex + 1, line);
 
             if (line != null) {
                 drawLine(graphics, line, red, thicknessLine);
@@ -79,7 +83,7 @@ namespace CardRotager {
             if (dots == null) {
                 return;
             }
-            
+
             for (int y = 0; y < dots.Length; y++) {
                 int x = dots[y];
                 if (dotSide == 0) {
@@ -113,7 +117,7 @@ namespace CardRotager {
         private int imageHeight;
         private int cardWidth;
         private int cardHeight;
-        
+
         public void calcFrame(int imageWidth, int imageHeight, int cardWidth, int cardHeight) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
@@ -140,17 +144,14 @@ namespace CardRotager {
         // const int Y5 = 12959;
 
         public List<Rectangle> makeFrame() {
-           
-            
             List<Rectangle> rects = new List<Rectangle>() {
-            
                 //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
                 //first colunm:
                 new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)),
                 new Rectangle(X1, Y2, (X2 - X1), (Y3 - Y2)),
                 new Rectangle(X1, Y3, (X2 - X1), (Y4 - Y3)),
                 new Rectangle(X1, Y4, (X2 - X1), (Y5 - Y4)),
-                
+
                 //second column:
                 new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)),
                 new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)),
@@ -165,6 +166,7 @@ namespace CardRotager {
                 gr.DrawRectangle(penFrame, item);
             }
         }
+
         public void drawTargetFrame(Graphics gr, Pen penFrame) {
             gr.DrawLine(penFrame, X1, 0, X1, imageHeight);
             gr.DrawLine(penFrame, X2, 0, X2, imageHeight);
@@ -175,6 +177,7 @@ namespace CardRotager {
             gr.DrawLine(penFrame, 0, Y4, imageWidth, Y4);
             gr.DrawLine(penFrame, 0, Y5, imageWidth, Y5);
         }
+
         public void drawTargetCutMark(Graphics gr, Pen penCutMark, int crossRadius) {
             drawLineCross(gr, penCutMark, Y1, crossRadius);
             drawLineCross(gr, penCutMark, Y2, crossRadius);
@@ -194,6 +197,7 @@ namespace CardRotager {
                 graphics.DrawRectangle(new Pen(RandomColors.RandomColor, 5), item);
             }
         }
+
         public void drawPolyLine(Graphics graphics, HVLine hvLine) {
             if (hvLine == null) {
                 return;
@@ -202,6 +206,10 @@ namespace CardRotager {
             for (int i = 1; i < points.Count; i++) {
                 graphics.DrawLine(penFuchsia, points[i - 1], points[i]);
             }
+        }
+
+        public void drawText(Graphics graphics, Font headerFont, string text) {
+            graphics.DrawString(text, headerFont, SystemBrushes.ControlText, new Rectangle(0, 0, imageWidth, Y1), headerStringFormat);
         }
     }
 }

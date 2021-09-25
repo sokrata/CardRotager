@@ -9,18 +9,16 @@ using System.Windows.Forms;
 
 namespace CardRotager {
     public class ImageProcessor {
-        private readonly Localize localize;
         private readonly LinesHDetector linesHDetector;
         private readonly LinesVDetector linesVDetector;
-        private readonly StringBuilder sb;
+        private readonly Logger log;
         private readonly Settings settings;
         private readonly ToolStripProgressBar statusBarProgressBar;
 
-        public ImageProcessor(Localize localize, StringBuilder sb, Settings settings, ToolStripProgressBar statusBarProgressBar) {
-            this.localize = localize;
+        public ImageProcessor(Logger log, Settings settings, ToolStripProgressBar statusBarProgressBar) {
+            this.log = log;
             linesHDetector = new LinesHDetector();
             linesVDetector = new LinesVDetector();
-            this.sb = sb;
             this.settings = settings;
             this.statusBarProgressBar = statusBarProgressBar;
         }
@@ -63,7 +61,7 @@ namespace CardRotager {
             using (UnmanagedImage unmanImage = LinesDetectorBase.prepareBitmap(bitmap, out BitmapData imageData)) {
                 try {
                     //горизонтальные линии:
-                    sb?.AppendFormat(l("== Определение всех горизонтальных линий верхнего ряда (с мин. длиной: {0}) ==\r\n"), settings.MinLineSizeY);
+                    log?.AppendFormat(l("== Определение всех горизонтальных линий верхнего ряда (с мин. длиной: {0}) ==\r\n"), settings.MinLineSizeY);
 
                     List<Edge> firstHLines = makeFirstHLines(unmanImage, width, height);
                     int hCount = firstHLines.Count;
@@ -74,24 +72,24 @@ namespace CardRotager {
                         LinesAll.Add(new List<HVLine>(1) {new HVLine(hLine, null)});
                     }
                     stopwatch.Stop();
-                    sb?.AppendFormat(l("\r\nИтоговое время определения верхнего ряда: {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
+                    log?.AppendFormat(l("\r\nИтоговое время определения верхнего ряда: {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
                     if (hCount != 2) {
                         string msg = string.Format(l("Поскольку количество колонок не 2, а {0}, обработка невозможна. Поддерживается обработка картинок содержащих только 2 колонки и 4 строки."), hCount);
-                        if (sb == null) {
+                        if (log == null) {
                             MessageBox.Show(msg, l("Ошибка"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         } else {
-                            sb.AppendFormat(l("\r\nОбъяснение: {0}\r\nОБРАБОТКА прервана!\r\n\r\n"), msg);
+                            log.AppendFormat(l("\r\nОбъяснение: {0}\r\nОБРАБОТКА прервана!\r\n\r\n"), msg);
                         }
                         return false;
                     }
                     stopwatch.Restart();
 
                     int colCount = LinesAll.Count;
-                    sb?.AppendFormat("Определено {0} колон(ки/ок)\r\n", colCount);
+                    log?.AppendFormat("Определено {0} колон(ки/ок)\r\n", colCount);
                     // вертикальные линии:
                     int rowCount = 1;
                     for (int colIndex = colCount - 1; colIndex >= 0; colIndex--) {
-                        sb?.AppendFormat(l("\r\n== Определение вертикальных линий для {0} колонки (с мин. длиной: {1}) ==\r\n"), colIndex + 1, settings.MinLineSizeY);
+                        log?.AppendFormat(l("\r\n== Определение вертикальных линий для {0} колонки (с мин. длиной: {1}) ==\r\n"), colIndex + 1, settings.MinLineSizeY);
                         //получим вертикальные линии в указанной колонке
                         List<Edge> columnVLines = processColumnVLines(unmanImage, colIndex, colCount, width, height);
                         progressIncrement();
@@ -103,19 +101,20 @@ namespace CardRotager {
 
                         //второй цикл определения горизонтальных линий для добавленных вертикальных строк:
                         //горизонтальные 2:
-                        List<Edge> vLineRows = makeLineRows(sb, colIndex, columnVLines, width, out int endX);
-                        int startX = colIndex > 0 ? LinesAll[colIndex - 1][0].HLine.X2 + settings.DotLineXMinAddWidth : 0;
-                        sb?.AppendFormat(l("\r\n== Определение горизонтальных линий остальных рядов для {0} колонки (с мин. длиной: {1}) ==\r\n"), colIndex + 1, settings.MinLineSizeY);
+                        List<Edge> vLineRows = makeLineRows(log, colIndex, columnVLines, width, out int endX);
+                        int startX = (colIndex > 0 ? LinesAll[colIndex - 1][0].HLine.X2 : 0) + settings.DotLineXStartAddWidth;
+                        endX += settings.DotLineXEndAddWidth;
+                        log?.AppendFormat(l("\r\n== Определение горизонтальных линий остальных рядов для {0} колонки (с мин. длиной: {1}) ==\r\n"), colIndex + 1, settings.MinLineSizeY);
 
                         for (int rowIndex = rowCount - 1; rowIndex > 0; rowIndex--) {
                             //добавляем горизонтальные линии в колонке
                             List<Edge> hLines = processRowLines(unmanImage, colIndex, rowIndex, startX, endX, height, vLineRows, rowCount);
                             if (hLines == null || hLines.Count == 0) {
                                 string msg = string.Format(l("Не удалось найти линию для colIndex = {0}, rowIndex = {1} обработка невозможна."), colIndex + 1, rowIndex + 1);
-                                if (sb == null) {
+                                if (log == null) {
                                     MessageBox.Show(msg, l("Ошибка"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 } else {
-                                    sb.AppendFormat(l("\r\nОбъяснение: {0}\r\nОБРАБОТКА прервана!\r\n\r\n"), msg);
+                                    log.AppendFormat(l("\r\nОбъяснение: {0}\r\nОБРАБОТКА прервана!\r\n\r\n"), msg);
                                 }
                                 return false;
                             }
@@ -124,7 +123,7 @@ namespace CardRotager {
                         }
 
                         stopwatch.Stop();
-                        sb?.AppendFormat(l("\r\nИтоговое время определения всех линий {0} колонки: {1} мс\r\n"), colIndex + 1, stopwatch.ElapsedMilliseconds);
+                        log?.AppendFormat(l("\r\nИтоговое время определения всех линий {0} колонки: {1} мс\r\n"), colIndex + 1, stopwatch.ElapsedMilliseconds);
                         stopwatch.Restart();
                     }
                 } finally {
@@ -135,7 +134,7 @@ namespace CardRotager {
             WinSpecific.clearMemory();
 
             stopwatch.Stop();
-            sb?.AppendFormat(l("\r\nФормирование сетки линий: Время {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
+            log?.AppendFormat(l("\r\nФормирование сетки линий: Время {0} мс\r\n"), stopwatch.ElapsedMilliseconds);
             return true;
         }
 
@@ -166,12 +165,12 @@ namespace CardRotager {
         }
 
         private void addSbInfo(List<Edge> hLinesAll) {
-            if (sb == null) {
+            if (log == null) {
                 return;
             }
 
             for (int i = 0; i < hLinesAll.Count; i++) {
-                sb.AppendFormat("{0}: {1}\r\n", i + 1, hLinesAll[i]);
+                log.AppendFormat("{0}: {1}\r\n", i + 1, hLinesAll[i]);
             }
         }
 
@@ -201,7 +200,7 @@ namespace CardRotager {
             getRangeX(colIndex, colCount, width, out int minX, out int maxX);
 
             linesVDetector.fillVDotsAll(minX, maxX, height, unmanagedImage, settings.DelLineLessSize, 0);//colCount - 1 == colIndex ? 70 : 0);
-            linesVDetector.createVLine(sb, settings.MinLineSizeY, settings.KillLength, out List<Edge> angleLines2);
+            linesVDetector.createVLine(log, settings.MinLineSizeY, settings.KillLength, out List<Edge> angleLines2);
             List<Edge> vLines = linesVDetector.VLines;
 
             if (linesVDetector.ShowLines != null) {
@@ -241,17 +240,17 @@ namespace CardRotager {
                 }
             }
             AngleEdges.AddRange(angleLines2);
-            if (sb != null) {
+            if (log != null) {
                 if (hLines.Count != 1) {
-                    sb.AppendFormat("число строк не равно 1 (hLines.Count = {0}, rowIndex = {1}\r\n", hLines.Count, rowIndex + 1);
+                    log.AppendFormat("число строк не равно 1 (hLines.Count = {0}, rowIndex = {1}\r\n", hLines.Count, rowIndex + 1);
                 }
-                sb.AppendFormat("{0}: {1}\r\n", rowIndex + 1, hLines[0]);
+                log.AppendFormat("{0}: {1}\r\n", rowIndex + 1, hLines[0]);
             }
             return hLines;
         }
 
         private string l(string text) {
-            return localize.localize(text);
+            return log.l(text);
         }
 
         private void getRangeY(int height, List<Edge> vLineRows, int rowIndex, out int minY, out int maxY) {
@@ -270,7 +269,7 @@ namespace CardRotager {
             }
         }
 
-        private static List<Edge> makeLineRows(StringBuilder sb, int colIndex, List<Edge> columnLines, int width, out int endX) {
+        private static List<Edge> makeLineRows(Logger log, int colIndex, List<Edge> columnLines, int width, out int endX) {
             List<Edge> vLineRows = new List<Edge>();
             vLineRows.AddRange(columnLines);
             vLineRows.Sort((x, y) => x.Y.CompareTo(y.Y));
@@ -282,9 +281,9 @@ namespace CardRotager {
                 endX = width;
             }
             int rowCount = vLineRows.Count;
-            if (sb != null) {
+            if (log != null) {
                 for (int i = 0; i < rowCount; i++) {
-                    sb.AppendFormat("{0}: {1}\r\n", i + 1, vLineRows[i]);
+                    log.AppendFormat("{0}: {1}\r\n", i + 1, vLineRows[i]);
                 }
             }
 

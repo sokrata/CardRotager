@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Edge.cs" />
     <Compile Include="Helper\Drawler.cs" />
+    <Compile Include="Helper\Logger.cs" />
     <Compile Include="Helper\PropertyObject.cs" />
     <Compile Include="Helper\Form1.cs">
       <SubType>Form</SubType>
@@ -101,6 +102,7 @@
     <Compile Include="Helper\Localize.cs" />
     <Compile Include="Helper\RandomColors.cs" />
     <Compile Include="Helper\UIFolderNameEditor.cs" />
+    <Compile Include="Helper\UIFontChooser.cs" />
     <Compile Include="Helper\Util.cs" />
     <Compile Include="Helper\WinSpecific.cs" />
     <Compile Include="ImageProcessor.cs" />

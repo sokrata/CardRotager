@@ -25,9 +25,11 @@ namespace CardRotager {
         private const int IGNORE_FIRST_Y_PIXELS = 0;
         private const int DOTLINE_Y_CUR_MIN_ADD_HEIGHT = 200;
         private const bool CONVERT_OPEN_IMAGE = true;
-        private const int DOTLINE_X_MIN_ADD_WIDTH = 100;
+        private const int DOTLINE_X_START_ADD_WIDTH = 100;
+        private const int DOTLINE_X_END_ADD_WIDTH = 0;
         private const string debug = "Отладка";
-        private const string main = "Основные";
+        private const string source = "Оригинальная картинка";
+        private const string target = "Результирующая картинка";
         private const string process = "Обработка";
         private const string xmlConvertOpenImage = "convertOpenImage";
         private const string xmlRotateFoundSubImages = "rotateFoundSubImages";
@@ -39,7 +41,8 @@ namespace CardRotager {
         private const string xmlFlipHorizontalEachRect = "flipHorizontalEachRect";
         private const string xmlMinLineSizeX = "minLineSizeX";
         private const string xmlMinLineSizeY = "minLineSizeY";
-        private const string xmlDotLineXMinAddWidth = "dotLineXMinAddWidth";
+        private const string xmlDotLineXStartAddWidth = "dotLineXStartAddWidth";
+        private const string xmlDotLineXEndAddWidth = "dotLineXEndAddWidth";
         private const string xmlDotLineYCurMinAddHeight = "dotLineYCurMinAddHeight";
         private const string xmlDotLineYPrevMaxAddHeight = "dotLineYPrevMaxAddHeight";
         private const string xmlDelLineLessSize = "delLineLessSize";
@@ -59,20 +62,27 @@ namespace CardRotager {
         private const string xmlLastOpenFileName = "lastOpenFileName";
         private const string xmlSaveEachRectangleFileName = "saveEachRectangleFileName";
         private const string xmlCustomSavePath = "customSavePath";
+        private const string xmlDrawTextOnTargetImage = "drawTextOnTargetImage";
+        private const string xmlDrawTextTargetFont = "drawTextTargetFont";
         private const string xmlFlipHorizontalEachRectFileMask = "flipHorizontalEachRectFileMask";
         private const string xmlShowHorVertLines = "showHorVertLines";
         public PropertyObject PropertyObject { get; }
+        public Logger log;
 
-        public Settings() {
+        public Settings(Logger log) {
+            this.log = log;
             PropertyObject = new PropertyObject(this);
 
-            PropertyObject.addParam(main, xmlConvertOpenImage, CONVERT_OPEN_IMAGE, l("Конвертировать открываемую картинку в Серый цвет"));
-            PropertyObject.addParam(main, xmlRotateFoundSubImages, false, l("Вращение найденных изображений карт"));
-            PropertyObject.addParam(main, xmlLastOpenFileName, "", l("Путь и имя последнего открытого файла"), true, false, new UIFolderNameEditor());
-            PropertyObject.addParam(main, xmlFlipHorizontalEachRect, false, l("Отразить по горизонтали каждый прямоугольник внутри себя и самих прямоугольник относительно друг друга"));
-            PropertyObject.addParam(main, xmlPercentHorizontalPadding, PERCENT_HOR_PADDING, l("Для определения наклона линий отступить от края указанный процент (1-50)"));
-            PropertyObject.addParam(main, xmlFlipHorizontalEachRectFileMask, "", l("Маска имени файла, когда изменить установленный в свойстве FlipHorizontalEachRect статус на противоположный"));
-            PropertyObject.addParam(main, xmlCustomSavePath, "", l("Путь к папке для сохранения. Если не заполнено, используется путь предлагаемый диалогом Windows"), true, false, new UIFolderNameEditor());
+            PropertyObject.addParam(target, xmlRotateFoundSubImages, false, l("Вращение найденных изображений карт"));
+            PropertyObject.addParam(target, xmlFlipHorizontalEachRect, false, l("Отразить по горизонтали каждый прямоугольник внутри себя и самих прямоугольник относительно друг друга"));
+            PropertyObject.addParam(target, xmlFlipHorizontalEachRectFileMask, "", l("Маска имени файла, когда изменить установленный в свойстве FlipHorizontalEachRect статус на противоположный"));
+            PropertyObject.addParam(target, xmlCustomSavePath, "", l("Путь к папке для сохранения. Если не заполнено, используется путь предлагаемый диалогом Windows"), true, false, new UIFolderNameEditor());
+            PropertyObject.addParam(target, xmlDrawTextOnTargetImage, "", l("Текст, отображаемый над картами, если заполнен (пример: {fno} выводит имя файла без расширения). Доступны автозамены: {fn} - имя главного файла, {fno} - имя глав.файла без расширения и точки"));
+            PropertyObject.addParam(target, xmlDrawTextTargetFont, "", l("Шрифт для текста отображаемый над картами. Если не указан используется системный шрифт для заголовков, установленный в теме Windows"), true, false, new UIFontChooser(log));
+            PropertyObject.addParam(target, xmlCutMarkShowOnTargetImageMask, "", l("Маска файла для которого добавляются на итоговое изображение точки реза (в виде перекрестий на стыке карт)"));
+            PropertyObject.addParam(target, xmlCutMarkColor, CUT_MARK_COLOR, l("Показывать список точек (голубым цветом) для номера карты по которым создаются линии (0 - не показывать)"));
+            PropertyObject.addParam(target, xmlCutMarkRadius, CUT_MARK_RADIUS, l("Радиус луча для точки реза (если задан параметр CutMarkShowOnTargetImageMask)"));
+            PropertyObject.addParam(target, xmlCutMarkThick, CUT_MARK_THICK, l("Толщина линий для точек реза (если задан параметр CutMarkShowOnTargetImageMask)"));
 
             PropertyObject.addParam(debug, xmlProcessCycleF4, false, l("F4 действует по кругу"));
             PropertyObject.addParam(debug, xmlShowImageFoundContour, false, l("Показывать найденные контуры карт"));
@@ -83,23 +93,23 @@ namespace CardRotager {
             PropertyObject.addParam(debug, xmlShowAngleLines, false, l("Отображение линий по которой рассчитывает угол"));
             PropertyObject.addParam(debug, xmlShowImageTargetFrame, false, l("Показывать области куда помещаются карты"));
             PropertyObject.addParam(debug, xmlProcessWhenOpen, CONVERT_OPEN_IMAGE, l("При открытии сразу обработать"));
-            PropertyObject.addParam(debug, xmlSaveEachRectangleFileName, "", l("Путь к папке и имя для сохранения найденных карт на картинке (пример: c:\\temp\\{fno}\\img{#}.bmp). Доступны автозамены: {#} на <номер карты>, {fn} на имя главного файла, {fno} на имя глав.файла без расширения и точки. Вместо bmp можно подставить расширения jpg, png, tif. Если не заполнено, не сохраняется"), true, false, new UIFolderNameEditor());
+            PropertyObject.addParam(debug, xmlSaveEachRectangleFileName, "", l("Путь к папке и имя для сохранения найденных карт на картинке (пример: c:\\temp\\{fno}\\img{#}.bmp). Доступны автозамены: {#} - <номер карты>, {fn} - имя главного файла, {fno} - имя глав.файла без расширения и точки. Вместо bmp можно подставить расширения jpg, png, tif. Если не заполнено, не сохраняется"), true, false, new UIFolderNameEditor());
 
+            PropertyObject.addParam(source, xmlConvertOpenImage, CONVERT_OPEN_IMAGE, l("Конвертировать открываемую картинку в Серый цвет"));
+            PropertyObject.addParam(source, xmlLastOpenFileName, "", l("Путь и имя последнего открытого файла"), true, false, new UIFolderNameEditor());
+            PropertyObject.addParam(source, xmlPercentHorizontalPadding, PERCENT_HOR_PADDING, l("Для определения наклона линий отступить от края указанный процент (1-50)"));
             PropertyObject.addParam(process, xmlCropPaddingTop, CROP_PADDING_TOP, l("Обрезать сверху карту (после поворота)"));
             PropertyObject.addParam(process, xmlCropPaddingRight, CROP_PADDING_RIGHT, l("Обрезать справа карту (после поворота)"));
             PropertyObject.addParam(process, xmlCropPaddingColor, CROP_PADDING_COLOR, l("Цвет заполнения для обрезки карты (после поворота)"));
             PropertyObject.addParam(process, xmlMinLineSizeX, MIN_LINE_SIZE_X, l("Минимальная учитываемая длина линии для определения горизонтальных линий"));
             PropertyObject.addParam(process, xmlMinLineSizeY, MIN_LINE_SIZE_Y, l("Минимальная учитываемая длина линии для определения вертикальных линий"));
-            PropertyObject.addParam(process, xmlDotLineXMinAddWidth, DOTLINE_X_MIN_ADD_WIDTH, l("Насколько пикселей расширить вправо область поиска вертикальной линии (shift X for minX)"));
+            PropertyObject.addParam(process, xmlDotLineXStartAddWidth, DOTLINE_X_START_ADD_WIDTH, l("Насколько пикселей сдвинуть вправо область начала поиска вертикальной линии (shift X for startX)"));
+            PropertyObject.addParam(process, xmlDotLineXEndAddWidth, DOTLINE_X_END_ADD_WIDTH, l("Насколько пикселей сдвинуть вправо область конца поиска вертикальной линии (shift X for endX)"));
             PropertyObject.addParam(process, xmlDotLineYCurMinAddHeight, DOTLINE_Y_CUR_MIN_ADD_HEIGHT, l("Насколько пикселей по вертикали расширить вниз область поиска горизонтальной линии от начала вертикальной линии (shift by Y for minY)"));
             PropertyObject.addParam(process, xmlDotLineYPrevMaxAddHeight, DOTLINE_Y_PREV_MAX_ADD_HEIGHT, l("Насколько пикселей по вертикали нужно отступить вниз для поиска горизонтальной линии от конца предыдущей вертикальной линии (shift by Y for previous maxY)"));
             PropertyObject.addParam(process, xmlDelLineLessSize, DEL_LINE_LESS_SIZE, l("Длина линии до которой пробовать подстраивать позицию Y под предыдущую горизонтальную линию"));
             PropertyObject.addParam(process, xmlIgnoreFirstYPixels, IGNORE_FIRST_Y_PIXELS, l("Игнорировать Y-пикселей для  определения верхнего ряда горизонтальных линий (игнорировать мусорные пылинки)"));
             PropertyObject.addParam(process, xmlKillLength, KILL_LENGTH, l("Удалим горизонтальные линии меньше указанной длины"));
-            PropertyObject.addParam(process, xmlCutMarkShowOnTargetImageMask, "", l("Маска файла для которого добавляются на итоговое изображение точки реза (в виде перекрестий на стыке карт)"));
-            PropertyObject.addParam(process, xmlCutMarkColor, CUT_MARK_COLOR, l("Показывать список точек (голубым цветом) для номера карты по которым создаются линии (0 - не показывать)"));
-            PropertyObject.addParam(process, xmlCutMarkRadius, CUT_MARK_RADIUS, l("Радиус луча для точки реза (если задан параметр CutMarkShowOnTargetImageMask)"));
-            PropertyObject.addParam(process, xmlCutMarkThick, CUT_MARK_THICK, l("Толщина линий для точек реза (если задан параметр CutMarkShowOnTargetImageMask)"));
         }
 
         private string l(string l) {
@@ -166,9 +176,14 @@ namespace CardRotager {
             set => PropertyObject[xmlMinLineSizeY].Value = value;
         }
 
-        public int DotLineXMinAddWidth {
-            get => (int) PropertyObject[xmlDotLineXMinAddWidth].Value;
-            set => PropertyObject[xmlDotLineXMinAddWidth].Value = value;
+        public int DotLineXStartAddWidth {
+            get => (int) PropertyObject[xmlDotLineXStartAddWidth].Value;
+            set => PropertyObject[xmlDotLineXStartAddWidth].Value = value;
+        }
+        
+        public int DotLineXEndAddWidth {
+            get => (int) PropertyObject[xmlDotLineXEndAddWidth].Value;
+            set => PropertyObject[xmlDotLineXEndAddWidth].Value = value;
         }
 
         public int DotLineYCurMinAddHeight {
@@ -264,6 +279,16 @@ namespace CardRotager {
         public string CustomSavePath {
             get => (string) PropertyObject[xmlCustomSavePath].Value;
             set => PropertyObject[xmlCustomSavePath].Value = value;
+        }
+
+        public string DrawTextOnTargetImage {
+            get => (string) PropertyObject[xmlDrawTextOnTargetImage].Value;
+            set => PropertyObject[xmlDrawTextOnTargetImage].Value = value;
+        }
+
+        public string DrawTextTargetFont { 
+            get => (string) PropertyObject[xmlDrawTextTargetFont].Value;
+            set => PropertyObject[xmlDrawTextTargetFont].Value = value; 
         }
 
         public void LoadFromXml(string fileName) {

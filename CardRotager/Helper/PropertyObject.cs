@@ -127,8 +127,9 @@ namespace CardRotager {
                 Type memberInfo = Value.GetType();
                 if (memberInfo == typeof(Color)) {
                     return Util.ToHtml((Color) Value);
-                }
-                if (memberInfo == typeof(bool)) {
+                } else if (memberInfo == typeof(Font)) {
+                    return new FontConverter().ConvertToString(Value);
+                } else if (memberInfo == typeof(bool)) {
                     return Value.ToString().ToLower();
                 }
                 return Value.ToString();

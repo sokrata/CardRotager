@@ -28,6 +28,7 @@ namespace CardRotager {
         const string openImageFileWithCardsClickHere = "Открыть файл изображения с картами (сейчас только 4 строки и 2 колонки)...\r\n(щелкните сюда)";
         private Brush spotBrush;
         private bool reloadInsteadReOpen = false;
+        public Logger log;
 
         /// <summary>
         /// Статус обработки изображения: Null - не открыт, false - открыт но не обработан, true - открыт и обработан
@@ -53,6 +54,7 @@ namespace CardRotager {
             InitializeComponent();
             imageProcessState = null;
             localize = new Localize();
+            localize.loadTranslatedText();
 
             pbDraft.MouseWheel += pictureBox_MouseWheel;
             panelDraft.MouseWheel += pictureBox_MouseWheel;
@@ -72,7 +74,10 @@ namespace CardRotager {
             pbDraft.Paint += onPbDraftOnPaint;
             pbSource.Paint += onPbSourceOnPaint;
             pbTarget.Paint += onPbTargetOnPaint;
-            settings = new Settings();
+
+
+            log = new Logger(localize, new StringBuilder());
+            settings = new Settings(log);
 
             float[] dashValues = {5, 2, 15, 4};
             redDashPen = new Pen(Color.Red, 5) {
@@ -82,10 +87,9 @@ namespace CardRotager {
 
             drawler = new Drawler();
         }
-
         private bool processImage() {
-            StringBuilder sb = new StringBuilder();
-            ip = new ImageProcessor(localize, sb, settings, statusBarProgressBar);
+            log.resetStringBuilder();
+            ip = new ImageProcessor(log, settings, statusBarProgressBar);
             Bitmap bmpDraft = ((Bitmap) pbDraft.Image);
             pbTarget.Image = null;
             bool result = ip.fillHVLinesAll(bmpDraft);
@@ -96,35 +100,35 @@ namespace CardRotager {
                     drawVerticalDots(graphics);
                 }
 
-                sb.AppendLine(l("Линии-границы поиска горизонтальных линий ниже верхних:"));
+                log.AppendLine(l("Линии-границы поиска горизонтальных линий ниже верхних:"));
                 if (!drawHelpLineOnPaint) {
-                    drawDashLine(graphics, sb);
+                    drawDashLine(graphics, log);
                 }
 
-                sb.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
+                log.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
 
                 if (!drawHelpLineOnPaint) {
-                    drawHLines(graphics, sb);
+                    drawHLines(graphics, log);
                 }
 
-                sb.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
+                log.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
                 if (!drawHelpLineOnPaint) {
-                    drawVLines(graphics, sb);
+                    drawVLines(graphics, log);
                 }
 
-                sb.AppendLine(l("\r\nЛинии, по которым рассчитывается угол наклона карт\r\n"));
+                log.AppendLine(l("\r\nЛинии, по которым рассчитывается угол наклона карт\r\n"));
                 if (!drawHelpLineOnPaint) {
-                    drawAngleLines(graphics, sb);
+                    drawAngleLines(graphics, log);
                 }
 
-                List<Rectangle> rectangles = makeRect(sb, ip.LinesAll, out List<float> angles);
+                List<Rectangle> rectangles = makeRect(log, ip.LinesAll, out List<float> angles);
 
                 if (!drawHelpLineOnPaint) {
                     drawRuler(graphics, width, height);
                 }
 
                 Bitmap originalImage = (Bitmap) pbSource.Image;
-                pbTarget.Image = makeTargetImage(originalImage, rectangles, width, height, angles, sb);
+                pbTarget.Image = makeTargetImage(originalImage, rectangles, width, height, angles);
 
                 if (!drawHelpLineOnPaint) {
                     using (Graphics originalGraphic = Graphics.FromImage(originalImage)) {
@@ -136,7 +140,7 @@ namespace CardRotager {
                 pbDraft.Invalidate();
             }
 
-            tbLog.Text = sb.ToString();
+            tbLog.Text = log.ConvertToString();
             WinSpecific.clearMemory();
             return result;
         }
@@ -164,7 +168,7 @@ namespace CardRotager {
             Application.DoEvents();
         }
 
-        private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles, StringBuilder sb) {
+        private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles) {
             const int EXTEND_SIDE = 50;
             const int EXT_WIDTH = 150;
             const int EXT_HEIGHT = 150;
@@ -172,8 +176,8 @@ namespace CardRotager {
             const int HEIGHT_6_3_CM = 2965 + EXT_HEIGHT; //px
             Bitmap targetImage = createEmptyBitmapSource(width, height, fromImage);
             using (Graphics toGraphics = Graphics.FromImage(targetImage)) {
-                int cardWidth = Math.Max(fromRectList.Max(a => a.Width), WIDTH_8_8_CM);
-                int cardHeight = Math.Max(fromRectList.Max(a => a.Height), HEIGHT_6_3_CM);
+                int cardWidth = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Width), WIDTH_8_8_CM);
+                int cardHeight = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Height), HEIGHT_6_3_CM);
                 drawler.calcFrame(width, height, cardWidth, cardHeight);
                 List<Rectangle> toRectList = drawler.makeFrame();
                 toGraphics.Clear(Color.White);
@@ -191,12 +195,12 @@ namespace CardRotager {
                     if (settings.RotateFoundSubImages) {
                         angle = -angles[imageIndex];
                     }
-                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, sb, needFlipRect, cropFillBrush);
+                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, log, needFlipRect, cropFillBrush);
                     progressIncrement();
                 }
 
                 if (!drawHelpLineOnPaint) {
-                    drawTargetFrame(toGraphics);
+                    drawOnTargetImage(toGraphics);
                 }
             }
             return targetImage;
@@ -241,21 +245,21 @@ namespace CardRotager {
             drawRuler(graphics, image.Width, image.Height);
         }
 
-        private void drawHLines(Graphics graphics, StringBuilder sb) {
+        private void drawHLines(Graphics graphics, Logger log) {
             if (settings.ShowHorVertLines && ip.LinesAll != null) {
                 for (int colIndex = 0; colIndex < ip.LinesAll.Count; colIndex++) {
                     for (int rowIndex = 0; rowIndex < ip.LinesAll[colIndex].Count; rowIndex++) {
-                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].HLine, Pens.Maroon, rowIndex, sb, true, settings.HVThickLine);
+                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].HLine, Pens.Maroon, rowIndex, log, true, settings.HVThickLine);
                     }
                 }
             }
         }
 
-        private void drawVLines(Graphics graphics, StringBuilder sb) {
+        private void drawVLines(Graphics graphics, Logger log) {
             if (settings.ShowHorVertLines && ip.LinesAll != null) {
                 for (int colIndex = 0; colIndex < ip.LinesAll.Count; colIndex++) {
                     for (int rowIndex = 0; rowIndex < ip.LinesAll[colIndex].Count; rowIndex++) {
-                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].VLine, Pens.Blue, rowIndex, sb, true, settings.HVThickLine);
+                        drawler.drawLine(graphics, ip.LinesAll[colIndex][rowIndex].VLine, Pens.Blue, rowIndex, log, true, settings.HVThickLine);
                     }
                 }
             }
@@ -267,7 +271,7 @@ namespace CardRotager {
             }
         }
 
-        private void drawTargetFrame(Graphics graphics) {
+        private void drawOnTargetImage(Graphics graphics) {
             const int penWidth = 7;
             Pen penFrame = new Pen(Color.LimeGreen, penWidth);
             if (settings.ShowImageTargetFrame) {
@@ -280,6 +284,14 @@ namespace CardRotager {
                 Pen penCutMark = new Pen(settings.CutMarkColor, penWidth);
                 drawler.drawTargetCutMark(graphics, penCutMark, settings.CutMarkRadius);
             }
+            if (!string.IsNullOrWhiteSpace(settings.DrawTextOnTargetImage)) {
+                string fn = Path.GetFileName(fileName);
+                string fnOnly = Path.GetFileNameWithoutExtension(fileName);
+                string text = settings.DrawTextOnTargetImage.Replace("{fn}", fn)
+                    .Replace("{fno}", fnOnly);
+                Font headerFont = UIFontChooser.createFont(settings.DrawTextTargetFont, SystemFonts.CaptionFont, log);
+                drawler.drawText(graphics, headerFont, text);
+            }
         }
 
         private void drawRuler(Graphics graphics, int width, int height) {
@@ -288,10 +300,10 @@ namespace CardRotager {
             }
         }
 
-        private void drawAngleLines(Graphics graphics, StringBuilder sb) {
+        private void drawAngleLines(Graphics graphics, Logger log) {
             Pen anglePen = new Pen(Color.Lime, 12);
             foreach (var angle in ip.AngleEdges) {
-                sb?.AppendFormat("{0}\r\n", angle);
+                log.AppendFormat("{0}\r\n", angle);
                 if (settings.ShowAngleLines) {
                     graphics.DrawLine(anglePen, angle.X, angle.Y, angle.X2, angle.Y2);
                 }
@@ -306,10 +318,10 @@ namespace CardRotager {
             }
         }
 
-        private void drawDashLine(Graphics graphics, StringBuilder sb) {
+        private void drawDashLine(Graphics graphics, Logger log) {
             bool showHelpLines = settings.ShowAngleLines;
             foreach (var item in ip.DashLines) {
-                sb?.AppendFormat("{0}\r\n", item);
+                log.AppendFormat("{0}\r\n", item);
                 if (showHelpLines) {
                     graphics.DrawLine(redDashPen, item.X, item.Y1, item.X2, item.Y2);
                 }
@@ -329,7 +341,7 @@ namespace CardRotager {
         }
 
         public void copyRegionIntoImage(Graphics toGraphic, Bitmap fromBitmap, int imageIndex, List<Rectangle> toRegionList, List<Rectangle> fromRegionList,
-            float angle, int extend, StringBuilder sb, bool needFlipRect, Brush cropFillBrush) {
+            float angle, int extend, Logger log, bool needFlipRect, Brush cropFillBrush) {
             Rectangle fromRegion = fromRegionList[imageIndex];
             Rectangle toRegion = toRegionList[imageIndex];
             //увеличим на запас (защита от скоса сторон картинки)
@@ -374,8 +386,8 @@ namespace CardRotager {
                         }
                     } catch (Exception ex) {
                         string stError = string.Format("Не удалось сохранить файл: {0}\r\n{1}", saveSubImageFileName, ex.Message);
-                        if (sb != null) {
-                            sb.Append(stError);
+                        if (log != null) {
+                            log.AppendLine(stError);
                         } else {
                             MessageBox.Show(stError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -453,18 +465,18 @@ namespace CardRotager {
         /// <summary>
         /// Сформировать линии для горизонтальных hLinesAll и вертикальных vLinesAll и высчитать углы в градусах списка angles
         /// </summary>
-        /// <param name="sb"></param>
+        /// <param name="log"></param>
         /// <param name="hLinesAll"></param>
         /// <param name="vLinesAll"></param>
         /// <param name="angles"></param>
         /// <returns></returns>
-        private List<Rectangle> makeRect(StringBuilder sb, List<List<HVLine>> LinesAll, out List<float> angles) {
-            sb?.AppendFormat(l("\r\nГабариты карт:\r\n"));
+        private List<Rectangle> makeRect(Logger log, List<List<HVLine>> LinesAll, out List<float> angles) {
+            log?.AppendFormat(l("\r\nГабариты карт:\r\n"));
             List<Rectangle> rectangles = new List<Rectangle>();
             angles = new List<float>();
             int i = 0;
             if (LinesAll == null) {
-                sb?.AppendFormat(l("Не удалось сформировать карт, так как нет линий.\r\n"));
+                log?.AppendFormat(l("Не удалось сформировать карт, так как нет линий.\r\n"));
                 return rectangles;
             }
             for (int hIndex = 0; hIndex < LinesAll.Count; hIndex++) {
@@ -472,7 +484,7 @@ namespace CardRotager {
                     Edge hLine = LinesAll[hIndex][vIndex].HLine;
                     Edge vLine = LinesAll[hIndex][vIndex].VLine;
                     if (hLine == null || vLine == null) {
-                        sb?.AppendFormat(l("Не хватает линий для формирования {0} рамки: горизонтальная = {1}, вертикальная = {2}\r\n"), i + 1, hLine, vLine);
+                        log?.AppendFormat(l("Не хватает линий для формирования {0} рамки: горизонтальная = {1}, вертикальная = {2}\r\n"), i + 1, hLine, vLine);
                         i++;
                         continue;
                     }
@@ -483,7 +495,7 @@ namespace CardRotager {
                     float angle = (float) hLine.Angle;
                     angles.Add(angle);
                     Rectangle item = new Rectangle(minX, minY, maxX - minX, maxY - minY);
-                    sb?.AppendFormat(l("{0}: {1}, angle = {2}\r\n"), i + 1, item, angle);
+                    log?.AppendFormat(l("{0}: {1}, angle = {2}\r\n"), i + 1, item, angle);
                     i++;
                     rectangles.Add(item);
                 }
@@ -530,8 +542,8 @@ namespace CardRotager {
                     using (Bitmap image2 = Grayscale.CommonAlgorithms.RMY.Apply(image)) {
                         using (Bitmap bitmap1 = threshold.Apply(image2)) {
                             MemoryStream ms = new MemoryStream();
-                            bitmap1.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                            var streamBitmap = System.Drawing.Image.FromStream(ms);
+                            bitmap1.Save(ms, ImageFormat.Jpeg);
+                            var streamBitmap = Image.FromStream(ms);
                             bitmap = new Bitmap(streamBitmap);
                         }
                     }
@@ -543,7 +555,7 @@ namespace CardRotager {
             loadImage(bitmap);
         }
 
-        private void loadImage(Bitmap bitmap) {
+        private void loadImage(Image bitmap) {
             pbDraft.Image = bitmap;
             pbDraft.Width = bitmap.Width;
             pbDraft.Height = bitmap.Height;

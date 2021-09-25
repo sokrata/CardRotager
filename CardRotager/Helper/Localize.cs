@@ -184,7 +184,6 @@ namespace CardRotager {
         }
 
         public void localizeControlAll(MainForm mainForm) {
-            loadTranslatedText();
             localizeControl(mainForm.lbHintSource);
             localizeControl(mainForm.lbHintTarget);
             localizeControl(mainForm);

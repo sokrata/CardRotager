@@ -74,7 +74,7 @@ namespace CardRotager {
             return radian * (180 / Math.PI);
         }
 
-        public void createVLine(StringBuilder sb, int minLineSizeX, int killLength, out List<Edge> angleLines2, bool debug = false) {
+        public void createVLine(Logger log, int minLineSizeX, int killLength, out List<Edge> angleLines2, bool debug = false) {
             angleLines2 = new List<Edge>();
 
             //если нет точки - пропуск
@@ -149,7 +149,7 @@ namespace CardRotager {
 
                 Edge maxLine = LineEdges[maxIndex];
 
-                if (sb != null && debug) {
+                if (log != null && debug) {
                     sb2 = new StringBuilder(string.Format(l("обработка {0}: {1}\r\n"), maxIndex, maxLine));
                 }
 
