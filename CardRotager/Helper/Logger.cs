@@ -1,4 +1,6 @@
+using System;
 using System.Text;
+using System.Windows.Forms;
 
 namespace CardRotager {
     public class Logger {
@@ -28,6 +30,10 @@ namespace CardRotager {
 
         public void resetStringBuilder() {
             sb.Clear();
+        }
+
+        public static void error(string msg, string arg1, Exception ex) {
+            MessageBox.Show(string.Format(msg, arg1, ex.Message), Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

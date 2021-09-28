@@ -192,7 +192,8 @@ namespace CardRotager {
 
             localizeControl(mainForm.menuImage);
             localizeControl(mainForm.menuImageOpenItem);
-            localizeControl(mainForm.menuImageSaveItem);
+            localizeControl(mainForm.menuImageSaveAsItem);
+            localizeControl(mainForm.menuImageQuickSaveAsItem);
             localizeControl(mainForm.menuImageSaveDraftItem);
             localizeControl(mainForm.menuImageCloseItem);
             localizeControl(mainForm.menuImageProcessItem);

@@ -57,7 +57,7 @@ namespace CardRotager {
         }
 
         protected static string l(string text) {
-            return MainForm.localize.localize(text);
+            return Program.localize.localize(text);
         }
 
         public float getBrightness(int R, int G, int B) {

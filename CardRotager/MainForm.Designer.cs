@@ -48,7 +48,8 @@ namespace CardRotager {
             this.menuImage = new System.Windows.Forms.ToolStripMenuItem();
             this.menuImageOpenItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuImageSaveDraftItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuImageSaveItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageQuickSaveAsItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuImageSaveAsItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuImageCloseItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuImageProcessItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -370,7 +371,7 @@ namespace CardRotager {
             // 
             // menuImage
             // 
-            this.menuImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.menuImageOpenItem, this.menuImageSaveDraftItem, this.menuImageSaveItem, this.menuImageCloseItem, this.toolStripMenuItem1, this.menuImageProcessItem, this.toolStripMenuItem2, this.menuImageExitItem});
+            this.menuImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.menuImageOpenItem, this.menuImageSaveDraftItem, this.menuImageQuickSaveAsItem, this.menuImageSaveAsItem, this.menuImageCloseItem, this.toolStripMenuItem1, this.menuImageProcessItem, this.toolStripMenuItem2, this.menuImageExitItem});
             this.menuImage.Name = "menuImage";
             this.menuImage.Size = new System.Drawing.Size(137, 29);
             this.menuImage.Text = "&Изображение";
@@ -378,8 +379,9 @@ namespace CardRotager {
             // menuImageOpenItem
             // 
             this.menuImageOpenItem.Name = "menuImageOpenItem";
+            this.menuImageOpenItem.ShortcutKeyDisplayString = "Ctrl+O; Alt+1";
             this.menuImageOpenItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.menuImageOpenItem.Size = new System.Drawing.Size(362, 30);
+            this.menuImageOpenItem.Size = new System.Drawing.Size(383, 30);
             this.menuImageOpenItem.Text = "&Открыть...";
             this.menuImageOpenItem.Click += new System.EventHandler(this.menuImageOpenItem_Click);
             // 
@@ -387,49 +389,57 @@ namespace CardRotager {
             // 
             this.menuImageSaveDraftItem.Name = "menuImageSaveDraftItem";
             this.menuImageSaveDraftItem.ShortcutKeys = ((System.Windows.Forms.Keys) (((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) | System.Windows.Forms.Keys.S)));
-            this.menuImageSaveDraftItem.Size = new System.Drawing.Size(362, 30);
+            this.menuImageSaveDraftItem.Size = new System.Drawing.Size(383, 30);
             this.menuImageSaveDraftItem.Text = "&Сохранить черновик...";
             this.menuImageSaveDraftItem.Click += new System.EventHandler(this.menuImageSaveDraftItem_Click);
             // 
-            // menuImageSaveItem
+            // menuImageQuickSaveAsItem
             // 
-            this.menuImageSaveItem.Name = "menuImageSaveItem";
-            this.menuImageSaveItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.menuImageSaveItem.Size = new System.Drawing.Size(362, 30);
-            this.menuImageSaveItem.Text = "&Сохранить результат...";
-            this.menuImageSaveItem.Click += new System.EventHandler(this.menuImageSaveItem_Click);
+            this.menuImageQuickSaveAsItem.Name = "menuImageQuickSaveAsItem";
+            this.menuImageQuickSaveAsItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.D2)));
+            this.menuImageQuickSaveAsItem.Size = new System.Drawing.Size(383, 30);
+            this.menuImageQuickSaveAsItem.Text = "&Быстро сохранить результат...";
+            this.menuImageQuickSaveAsItem.Click += new System.EventHandler(this.menuImageQuickSaveAsItem_Click);
+            // 
+            // menuImageSaveAsItem
+            // 
+            this.menuImageSaveAsItem.Name = "menuImageSaveAsItem";
+            this.menuImageSaveAsItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.menuImageSaveAsItem.Size = new System.Drawing.Size(383, 30);
+            this.menuImageSaveAsItem.Text = "&Сохранить результат как...";
+            this.menuImageSaveAsItem.Click += new System.EventHandler(this.menuImageSaveItem_Click);
             // 
             // menuImageCloseItem
             // 
             this.menuImageCloseItem.Name = "menuImageCloseItem";
             this.menuImageCloseItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.menuImageCloseItem.Size = new System.Drawing.Size(362, 30);
+            this.menuImageCloseItem.Size = new System.Drawing.Size(383, 30);
             this.menuImageCloseItem.Text = "Закрыть";
             this.menuImageCloseItem.Click += new System.EventHandler(this.menuImageCloseItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(359, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(380, 6);
             // 
             // menuImageProcessItem
             // 
             this.menuImageProcessItem.Name = "menuImageProcessItem";
             this.menuImageProcessItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
-            this.menuImageProcessItem.Size = new System.Drawing.Size(362, 30);
+            this.menuImageProcessItem.Size = new System.Drawing.Size(383, 30);
             this.menuImageProcessItem.Text = "Обр&аботка";
             this.menuImageProcessItem.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(359, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(380, 6);
             // 
             // menuImageExitItem
             // 
             this.menuImageExitItem.Name = "menuImageExitItem";
             this.menuImageExitItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.X)));
-            this.menuImageExitItem.Size = new System.Drawing.Size(362, 30);
+            this.menuImageExitItem.Size = new System.Drawing.Size(383, 30);
             this.menuImageExitItem.Text = "В&ыход";
             // 
             // MenuView
@@ -478,21 +488,21 @@ namespace CardRotager {
             // конверторToolStripMenuItem
             // 
             this.конверторToolStripMenuItem.Name = "конверторToolStripMenuItem";
-            this.конверторToolStripMenuItem.Size = new System.Drawing.Size(255, 30);
+            this.конверторToolStripMenuItem.Size = new System.Drawing.Size(268, 30);
             this.конверторToolStripMenuItem.Text = "Конвертор";
             this.конверторToolStripMenuItem.Click += new System.EventHandler(this.form2ToolStripMenuItem_Click);
             // 
             // form2ToolStripMenuItem1
             // 
             this.form2ToolStripMenuItem1.Name = "form2ToolStripMenuItem1";
-            this.form2ToolStripMenuItem1.Size = new System.Drawing.Size(255, 30);
-            this.form2ToolStripMenuItem1.Text = "Form2";
+            this.form2ToolStripMenuItem1.Size = new System.Drawing.Size(268, 30);
+            this.form2ToolStripMenuItem1.Text = "Изменить разрешение";
             this.form2ToolStripMenuItem1.Click += new System.EventHandler(this.form2ToolStripMenuItem1_Click);
             // 
             // saveTextForTranslateToolStripMenuItem
             // 
             this.saveTextForTranslateToolStripMenuItem.Name = "saveTextForTranslateToolStripMenuItem";
-            this.saveTextForTranslateToolStripMenuItem.Size = new System.Drawing.Size(255, 30);
+            this.saveTextForTranslateToolStripMenuItem.Size = new System.Drawing.Size(268, 30);
             this.saveTextForTranslateToolStripMenuItem.Text = "Save text for translate";
             this.saveTextForTranslateToolStripMenuItem.Click += new System.EventHandler(this.saveTextForTranslateToolStripMenuItem_Click);
             // 
@@ -524,7 +534,7 @@ namespace CardRotager {
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.menuImageOpenButton, this.menuImageSaveButton, this.printToolStripButton, this.toolStripSeparator, this.menuCopyButton, this.menuPasteButton, this.toolStripSeparator1, this.menuScale10PercentButton, this.menuProcessButton, this.toolStripSeparator2, this.menuZoomButton});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(681, 67);
+            this.toolStrip1.Size = new System.Drawing.Size(586, 67);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -779,6 +789,8 @@ namespace CardRotager {
             this.Text = "Переразмещение карт в скане графического файла в центрах указанной сетки";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.mainForm_FormClosed);
             this.Load += new System.EventHandler(this.mainForm_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
+            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.MainForm_PreviewKeyDown);
             this.tabControl1.ResumeLayout(false);
             this.tabPageImage.ResumeLayout(false);
             this.splitContainerImage.Panel1.ResumeLayout(false);
@@ -823,6 +835,7 @@ namespace CardRotager {
             this.PerformLayout();
         }
 
+        public System.Windows.Forms.ToolStripMenuItem menuImageQuickSaveAsItem;
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem menuZoom15Button;
@@ -886,7 +899,7 @@ namespace CardRotager {
         private System.Windows.Forms.ToolStripMenuItem menuLanguage;
         private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
-        public System.Windows.Forms.ToolStripMenuItem menuImageSaveItem;
+        public System.Windows.Forms.ToolStripMenuItem menuImageSaveAsItem;
         public System.Windows.Forms.ToolStripMenuItem menuImageSaveDraftItem;
         private ContextMenuStrip contextMenuPropertyGrid;
         private ToolStripMenuItem menuContextResetItem;

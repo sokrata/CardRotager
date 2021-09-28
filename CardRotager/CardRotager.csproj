@@ -91,11 +91,11 @@
     <Compile Include="Helper\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helper\Form2.cs">
+    <Compile Include="Helper\ProcessImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Helper\Form2.Designer.cs">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <Compile Include="Helper\ProcessImageForm.Designer.cs">
+      <DependentUpon>ProcessImageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper\HelpClass.cs" />
     <Compile Include="Helper\HSBColor.cs" />
@@ -122,8 +122,8 @@
     <EmbeddedResource Include="Helper\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Helper\Form2.resx">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <EmbeddedResource Include="Helper\ProcessImageForm.resx">
+      <DependentUpon>ProcessImageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

@@ -6,7 +6,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -28,7 +27,6 @@ namespace CardRotager {
         const string openImageFileWithCardsClickHere = "Открыть файл изображения с картами (сейчас только 4 строки и 2 колонки)...\r\n(щелкните сюда)";
         private Brush spotBrush;
         private bool reloadInsteadReOpen = false;
-        public Logger log;
 
         /// <summary>
         /// Статус обработки изображения: Null - не открыт, false - открыт но не обработан, true - открыт и обработан
@@ -41,7 +39,6 @@ namespace CardRotager {
         }
 
         public Drawler drawler;
-        public static Localize localize;
         private ImageProcessor ip;
 
         //false-режим не работает, т.к. масштаб для pictureBox не учитывается
@@ -50,11 +47,9 @@ namespace CardRotager {
         public string AppSettingFileName { get; } = Path.Combine(Application.UserAppDataPath, "setting.xml");
         public Settings settings;
 
-        public MainForm() {
+        public MainForm(Logger log) {
             InitializeComponent();
             imageProcessState = null;
-            localize = new Localize();
-            localize.loadTranslatedText();
 
             pbDraft.MouseWheel += pictureBox_MouseWheel;
             panelDraft.MouseWheel += pictureBox_MouseWheel;
@@ -76,7 +71,6 @@ namespace CardRotager {
             pbTarget.Paint += onPbTargetOnPaint;
 
 
-            log = new Logger(localize, new StringBuilder());
             settings = new Settings(log);
 
             float[] dashValues = {5, 2, 15, 4};
@@ -88,8 +82,8 @@ namespace CardRotager {
             drawler = new Drawler();
         }
         private bool processImage() {
-            log.resetStringBuilder();
-            ip = new ImageProcessor(log, settings, statusBarProgressBar);
+            Program.log.resetStringBuilder();
+            ip = new ImageProcessor(Program.log, settings, statusBarProgressBar);
             Bitmap bmpDraft = ((Bitmap) pbDraft.Image);
             pbTarget.Image = null;
             bool result = ip.fillHVLinesAll(bmpDraft);
@@ -100,28 +94,28 @@ namespace CardRotager {
                     drawVerticalDots(graphics);
                 }
 
-                log.AppendLine(l("Линии-границы поиска горизонтальных линий ниже верхних:"));
+                Program.log.AppendLine(l("Линии-границы поиска горизонтальных линий ниже верхних:"));
                 if (!drawHelpLineOnPaint) {
-                    drawDashLine(graphics, log);
+                    drawDashLine(graphics, Program.log);
                 }
 
-                log.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
+                Program.log.AppendFormat(l(l("\r\nИтоговые горизонтальные линии: \r\n")));
 
                 if (!drawHelpLineOnPaint) {
-                    drawHLines(graphics, log);
+                    drawHLines(graphics, Program.log);
                 }
 
-                log.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
+                Program.log.AppendFormat(l("\r\nИтоговые вертикальные линии: \r\n"));
                 if (!drawHelpLineOnPaint) {
-                    drawVLines(graphics, log);
+                    drawVLines(graphics, Program.log);
                 }
 
-                log.AppendLine(l("\r\nЛинии, по которым рассчитывается угол наклона карт\r\n"));
+                Program.log.AppendLine(l("\r\nЛинии, по которым рассчитывается угол наклона карт\r\n"));
                 if (!drawHelpLineOnPaint) {
-                    drawAngleLines(graphics, log);
+                    drawAngleLines(graphics, Program.log);
                 }
 
-                List<Rectangle> rectangles = makeRect(log, ip.LinesAll, out List<float> angles);
+                List<Rectangle> rectangles = makeRect(Program.log, ip.LinesAll, out List<float> angles);
 
                 if (!drawHelpLineOnPaint) {
                     drawRuler(graphics, width, height);
@@ -140,7 +134,7 @@ namespace CardRotager {
                 pbDraft.Invalidate();
             }
 
-            tbLog.Text = log.ConvertToString();
+            tbLog.Text = Program.log.ConvertToString();
             WinSpecific.clearMemory();
             return result;
         }
@@ -195,13 +189,16 @@ namespace CardRotager {
                     if (settings.RotateFoundSubImages) {
                         angle = -angles[imageIndex];
                     }
-                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, log, needFlipRect, cropFillBrush);
+                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, Program.log, needFlipRect, cropFillBrush);
                     progressIncrement();
                 }
 
                 if (!drawHelpLineOnPaint) {
                     drawOnTargetImage(toGraphics);
                 }
+            }
+            if (settings.NewDpiX > 0 || settings.NewDpiY > 0) {
+                return CardRotager.ProcessImageForm.processBatchFile(targetImage, settings.NewDpiX, settings.NewDpiY);
             }
             return targetImage;
         }
@@ -287,9 +284,10 @@ namespace CardRotager {
             if (!string.IsNullOrWhiteSpace(settings.DrawTextOnTargetImage)) {
                 string fn = Path.GetFileName(fileName);
                 string fnOnly = Path.GetFileNameWithoutExtension(fileName);
+                string extOnly = Path.GetExtension(fileName);
                 string text = settings.DrawTextOnTargetImage.Replace("{fn}", fn)
-                    .Replace("{fno}", fnOnly);
-                Font headerFont = UIFontChooser.createFont(settings.DrawTextTargetFont, SystemFonts.CaptionFont, log);
+                    .Replace("{fno}", fnOnly).Replace("{ext}", extOnly);
+                Font headerFont = UIFontChooser.createFont(settings.DrawTextTargetFont, SystemFonts.CaptionFont, Program.log);
                 drawler.drawText(graphics, headerFont, text);
             }
         }
@@ -329,7 +327,7 @@ namespace CardRotager {
         }
 
         private string l(string text) {
-            return localize.localize(text);
+            return Program.localize.localize(text);
         }
 
         public static Bitmap createEmptyBitmapSource(int width, int height, Bitmap bitmapOriginal) {
@@ -843,7 +841,7 @@ namespace CardRotager {
         }
 
         private void form2ToolStripMenuItem1_Click(object sender, EventArgs e) {
-            new Form2().ShowDialog();
+            new ProcessImageForm(Program.log).ShowDialog();
         }
 
         private void form2ToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -914,24 +912,28 @@ namespace CardRotager {
         }
 
         private void saveTextForTranslateToolStripMenuItem_Click(object sender, EventArgs e) {
-            localize.saveCollectedLine();
+            Program.localize.saveCollectedLine();
         }
 
         private void englishToolStripMenuItem_Click(object sender, EventArgs e) {
             Localize.Language = "en-US";
-            localize.localizeControl(this);
+            Program.localize.localizeControl(this);
         }
 
         private void russianToolStripMenuItem_Click(object sender, EventArgs e) {
             Localize.Language = null;
-            localize.revert(true);
-            localize.localizeControl(this);
-            localize.revert(false);
-            localize.resetLoadTranslate();
+            Program.localize.revert(true);
+            Program.localize.localizeControl(this);
+            Program.localize.revert(false);
+            Program.localize.resetLoadTranslate();
         }
 
         private void menuImageSaveItem_Click(object sender, EventArgs e) {
-            if (imageProcessState != true || pbTarget.Image == null) {
+            saveImageToFile(false);
+        }
+
+        private void saveImageToFile(bool directSave) {
+            if (imageProcessState != true || pbTarget.Image == null || directSave && string.IsNullOrEmpty(fileName)) {
                 MessageBox.Show(l("Невозможно скопировать обработанный файл. Необходимо открыть и обработать файл с изображением."),
                     l("Сохранение обработанного файла изображения"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -943,49 +945,56 @@ namespace CardRotager {
                 string extension = Path.GetExtension(fileName).ToLower();
                 saveFileDialog.FilterIndex = getFilterByExt(extension);
                 saveFileDialog.InitialDirectory = Path.GetDirectoryName(fileName);
-                saveFileDialog.FileName = Path.ChangeExtension(Path.GetFileName(fileName), extension);
+                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(fileName);
             }
             if (!string.IsNullOrWhiteSpace(settings.CustomSavePath)) {
                 saveFileDialog.InitialDirectory = settings.CustomSavePath;
             }
-
-            if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
+            if (directSave) {
+                string outFileName = Path.Combine(saveFileDialog.InitialDirectory,  Path.GetFileName(fileName));
+                pbTarget.Image.Save(outFileName, getFilterByIndex(saveFileDialog.FilterIndex));
+                System.Media.SystemSounds.Hand.Play();
+            } else if (saveFileDialog.ShowDialog(this) == DialogResult.OK) {
                 pbTarget.Image.Save(saveFileDialog.FileName, getFilterByIndex(saveFileDialog.FilterIndex));
             }
+            statusBarInfo.Text = "Файл успешно сохранён";
         }
 
         public static int getFilterByExt(string extension) {
             switch (extension) {
-                default:
-                case ".bmp":
-                    return 3;
-
                 case ".jpg":
                 case ".jpeg":
                 case ".jfif":
                 case ".jpe":
-                    return 0;
+                    return 1;
+                
+                case ".png":
+                    return 2;
 
                 case ".tiff":
                 case ".tif":
-                    return 2;
-
-                case ".png":
-                    return 1;
+                    return 3;
+                
+                default:
+                case ".bmp":
+                    return 4;
             }
         }
 
         public static ImageFormat getFilterByIndex(int filterIndex) {
             switch (filterIndex) {
-                default:
-                case 3:
-                    return ImageFormat.Bmp;
-                case 0:
-                    return ImageFormat.Png;
                 case 1:
                     return ImageFormat.Jpeg;
+                
                 case 2:
+                    return ImageFormat.Png;
+                
+                case 3:
                     return ImageFormat.Tiff;
+                
+                default:
+                case 4:
+                    return ImageFormat.Bmp;
             }
         }
 
@@ -1030,9 +1039,9 @@ namespace CardRotager {
         }
 
         private void mainForm_Load(object sender, EventArgs e) {
-            localize.localizeControlAll(this);
+            Program.localize.localizeControlAll(this);
 
-            settings.LoadFromXml(AppSettingFileName);
+            settings.loadFromXml(AppSettingFileName);
             propertyGrid1.SelectedObject = settings.PropertyObject;
             propertyGrid1.Refresh();
             statusBarInfo.Text = l("(Слева отображается шкала процесса обработки изображения)");
@@ -1102,6 +1111,22 @@ namespace CardRotager {
                 drawler.drawRect(g, spotBrush, pt.X, pt.Y, 20);
             }
             pbSource.Invalidate();
+        }
+
+        private void menuImageQuickSaveAsItem_Click(object sender, EventArgs e) {
+            saveImageToFile(true);
+        }
+
+        private void MainForm_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
+            if (e.Alt && e.KeyCode == Keys.D1) {
+                menuImageOpenItem.PerformClick();
+            }
+        }
+
+        private void MainForm_KeyUp(object sender, KeyEventArgs e) {
+            if (e.Alt && e.KeyCode == Keys.D1) {
+                menuImageOpenItem.PerformClick();
+            }
         }
     }
 

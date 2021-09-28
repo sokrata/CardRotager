@@ -3,15 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Xml;
 
 namespace CardRotager {
     public class PropertyObject : CollectionBase, ICustomTypeDescriptor {
         private Dictionary<string,DynProperty> props;
-        private Settings settings;
 
-        public PropertyObject(Settings settings) {
+        public PropertyObject() {
             props = new Dictionary<string, DynProperty>();
-            this.settings = settings;
         }
 
         /// <summary>
@@ -99,12 +100,57 @@ namespace CardRotager {
 
         #endregion
 
-        public void addParam(string category, string name, object defaultValue, string description, bool browsable = true, bool readOnly = false, object editor = null) {
-            Add(new DynProperty(name, defaultValue, false, true, description, category, editor));
+        public void addParam(string category, string name, object defaultValue, bool saveLoad, string description = "", bool browsable = true, bool readOnly = false, object editor = null) {
+            Add(new DynProperty(name, defaultValue, saveLoad, readOnly, browsable, description, category, editor));
         }
 
         public new IEnumerator GetEnumerator() {
             return props.Values.GetEnumerator();
+        }
+
+        public int i(string param) {
+            return (int) props[param].Value;
+        }
+        public string s(string param) {
+            return (string) props[param].Value;
+        }
+
+        public void saveToXmlNode(XmlElement xmlNode) {
+            foreach (DynProperty property in this) {
+                xmlNode.SetAttribute(property.Name, property.StringValue);
+            }
+        }
+
+        public void loadFromXml(XmlElement element) {
+            foreach (XmlNode property in element.Attributes) {
+                string name = property.Name;
+                if (ContainProperty(name)) {
+                    this[name].StringValue = property.Value;
+                }
+            }
+        }
+
+        public void loadFromXml(string fileName, string xPath) {
+            if (!File.Exists(fileName)) {
+                return;
+            }
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(fileName);
+
+            XmlNode xmlRoot = xmlDoc.DocumentElement.SelectSingleNode(xPath);
+            if (!(xmlRoot is XmlElement element)) {
+                return;
+            }
+            loadFromXml(element);
+        }
+
+        public void saveToXml(string fileName, string emptyXml, string xPath) {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(emptyXml);
+            XmlNode xmlRoot = xmlDoc.DocumentElement.SelectSingleNode(xPath);
+            XmlElement xmlNode = ((XmlElement) xmlRoot);
+            saveToXmlNode(xmlNode);
+            xmlDoc.Save(fileName);
         }
     }
 
@@ -113,6 +159,7 @@ namespace CardRotager {
         public string Name { get; }
         public object Value { get; set; }
         public object DefaultValue { get; }
+        public bool SaveLoad { get; }
         public string Description { get; }
         public bool Visible { get; }
         public bool ReadOnly { get; }
@@ -131,6 +178,10 @@ namespace CardRotager {
                     return new FontConverter().ConvertToString(Value);
                 } else if (memberInfo == typeof(bool)) {
                     return Value.ToString().ToLower();
+                } else if (memberInfo == typeof(float)) {
+                    return ((float) Value).ToString(CultureInfo.InvariantCulture);
+                } else if (memberInfo == typeof(double)) {
+                    return ((double) Value).ToString(CultureInfo.InvariantCulture);
                 }
                 return Value.ToString();
             }
@@ -150,14 +201,19 @@ namespace CardRotager {
                     Value = intValue;
                 } else if (type == typeof(long) && long.TryParse(value, out long longValue)) {
                     Value = longValue;
+                } else if (type == typeof(float) && float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out float floatValue)) {
+                    Value = floatValue;
+                } else if (type == typeof(double) && double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double doubleValue)) {
+                    Value = doubleValue;
                 }
             }
         }
 
-        public DynProperty(string sName, object defaultValue, bool bReadOnly, bool bVisible, string description, string category, object editor = null) {
+        public DynProperty(string sName, object defaultValue, bool saveLoad, bool bReadOnly, bool bVisible, string description, string category, object editor = null) {
             Value = defaultValue;
             Name = sName;
             DefaultValue = defaultValue;
+            SaveLoad = saveLoad;
             ReadOnly = bReadOnly;
             Visible = bVisible;
             Description = description;
