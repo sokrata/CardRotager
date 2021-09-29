@@ -1,7 +1,10 @@
 # CardRotager
 Программа для работы с изображениями - центрование отсканированных карт
+Скриншоты: Главное окно для обработки изображений
+![mainForm](https://user-images.githubusercontent.com/17400519/135347407-edb79c62-1d04-43e7-a40d-39387d920bf8.jpg)
+Закладка с настройками и отображения определенных карт и огибающих линий (вертикальной и горизонтальной для каждой карты)
+![settingTab](https://user-images.githubusercontent.com/17400519/135347426-149e0339-66f7-4803-be03-36e8120002a1.jpg)
 
-<img width="1283" alt="screenshot" src="https://user-images.githubusercontent.com/17400519/131243459-267f7c31-2207-4f8f-8581-19daaea61b7b.png">
 
 ﻿License: use the code with the notification of the author. Cannot be used in commercial applications. You can contact the author via e-mail. Author's email: sokrata@yandex.ru
   
