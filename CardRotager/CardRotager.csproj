@@ -153,6 +153,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CardRotager_Release.rar" />
     <Content Include="en-US.lng" />
     <Content Include="Helper\code.txt" />
     <Content Include="License.txt" />
