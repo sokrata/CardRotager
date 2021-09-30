@@ -267,7 +267,7 @@ namespace CardRotager {
             return !Equals(prop.Value, prop.DefaultValue);
         }
 
-        public override Type PropertyType => prop.Value.GetType();
+        public override Type PropertyType => prop.Value == null ? typeof(Object) : prop.Value.GetType();
 
         #endregion
     }

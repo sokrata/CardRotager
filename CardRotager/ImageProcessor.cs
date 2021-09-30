@@ -140,7 +140,11 @@ namespace CardRotager {
 
         private void progressIncrement() {
             statusBarProgressBar.Increment(1);
-            Application.DoEvents();
+            try {
+                Application.DoEvents();
+            } catch (Exception ex) {
+                Debug.WriteLine(ex.Message);
+            }
         }
 
         /// <summary>

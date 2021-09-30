@@ -86,7 +86,9 @@ namespace CardRotager {
             ip = new ImageProcessor(Program.log, settings, statusBarProgressBar);
             Bitmap bmpDraft = ((Bitmap) pbDraft.Image);
             pbTarget.Image = null;
+            pbDraft.Image = null;
             bool result = ip.fillHVLinesAll(bmpDraft);
+            pbDraft.Image = bmpDraft;
             int width = bmpDraft.Width;
             int height = bmpDraft.Height;
             using (Graphics graphics = Graphics.FromImage(bmpDraft)) {
@@ -164,22 +166,16 @@ namespace CardRotager {
 
         private Image makeTargetImage(Bitmap fromImage, List<Rectangle> fromRectList, int width, int height, List<float> angles) {
             const int EXTEND_SIDE = 50;
-            const int EXT_WIDTH = 150;
-            const int EXT_HEIGHT = 150;
-            const int WIDTH_8_8_CM = 4160 + EXT_WIDTH; //px
-            const int HEIGHT_6_3_CM = 2965 + EXT_HEIGHT; //px
             Bitmap targetImage = createEmptyBitmapSource(width, height, fromImage);
             using (Graphics toGraphics = Graphics.FromImage(targetImage)) {
-                int cardWidth = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Width), WIDTH_8_8_CM);
-                int cardHeight = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Height), HEIGHT_6_3_CM);
-                drawler.calcFrame(width, height, cardWidth, cardHeight);
-                List<Rectangle> toRectList = drawler.makeFrame();
+                int cardWidth = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Width), settings.MinCardWidth);
+                int cardHeight = Math.Max(fromRectList.Count == 0 ? 0 : fromRectList.Max(a => a.Height), settings.MinCardHeight);
+                int rowCount = fromRectList.Count / 2;
+                drawler.calcFrame(width, height, cardWidth, cardHeight, rowCount, settings.CenteredImage);
+                List<Rectangle> toRectList = drawler.makeFrame(rowCount);
                 toGraphics.Clear(Color.White);
-                bool needFlipRect = isNeedFlipRect();
+                FlipAndMirrorType flipType = getFlipRect();
                 Brush cropFillBrush = new SolidBrush(settings.CropPaddingColor);
-                // for (int imageIndex = 0; imageIndex < fromRectList.Count; imageIndex++) {
-                //     fromRectList[imageIndex].Inflate(new Size(EXTEND_SIDE, EXTEND_SIDE));
-                // }
                 for (int imageIndex = 0; imageIndex < toRectList.Count; imageIndex++) {
                     if (imageIndex >= fromRectList.Count) {
                         break;
@@ -189,7 +185,7 @@ namespace CardRotager {
                     if (settings.RotateFoundSubImages) {
                         angle = -angles[imageIndex];
                     }
-                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, Program.log, needFlipRect, cropFillBrush);
+                    copyRegionIntoImage(toGraphics, fromImage, imageIndex, toRectList, fromRectList, angle, EXTEND_SIDE, Program.log, flipType, cropFillBrush, rowCount);
                     progressIncrement();
                 }
 
@@ -339,7 +335,7 @@ namespace CardRotager {
         }
 
         public void copyRegionIntoImage(Graphics toGraphic, Bitmap fromBitmap, int imageIndex, List<Rectangle> toRegionList, List<Rectangle> fromRegionList,
-            float angle, int extend, Logger log, bool needFlipRect, Brush cropFillBrush) {
+            float angle, int extend, Logger log, FlipAndMirrorType flipType, Brush cropFillBrush, int rowCount) {
             Rectangle fromRegion = fromRegionList[imageIndex];
             Rectangle toRegion = toRegionList[imageIndex];
             //увеличим на запас (защита от скоса сторон картинки)
@@ -393,12 +389,14 @@ namespace CardRotager {
                 }
 
                 Rectangle srcRect = new Rectangle(0, 0, rotatedBitmap.Width, rotatedBitmap.Height);
-                if (needFlipRect) {
+                if (flipType != FlipAndMirrorType.None) {
                     rotatedBitmap.RotateFlip(RotateFlipType.RotateNoneFlipXY);
-                    if (imageIndex < 4) {
-                        toRegion = toRegionList[imageIndex + 4];
-                    } else {
-                        toRegion = toRegionList[imageIndex - 4];
+                    if (flipType == FlipAndMirrorType.FlipAndMirrorXY) {
+                        if (imageIndex < rowCount) {
+                            toRegion = toRegionList[imageIndex + rowCount];
+                        } else {
+                            toRegion = toRegionList[imageIndex - rowCount];
+                        }
                     }
                 }
                 int addX = (toRegion.Width - fromRegion.Width) / 2;
@@ -413,14 +411,17 @@ namespace CardRotager {
         /// Нужна ли переворот карт и колонок
         /// </summary>
         /// <returns>true, нужна</returns>
-        private bool isNeedFlipRect() {
-            if (settings.FlipHorizontalEachRect) {
-                return true;
+        private FlipAndMirrorType getFlipRect() {
+            if (settings.FlipAndMirrorHorizontalEachRect) {
+                return FlipAndMirrorType.FlipAndMirrorXY;
             }
-            if (string.IsNullOrEmpty(settings.FlipHorizontalEachRectFileMask)) {
-                return false;
+            if (settings.FlipVerticalEachRect) {
+                return FlipAndMirrorType.FlipXY;
             }
-            return isFileMaskMatch(fileName, settings.FlipHorizontalEachRectFileMask);
+            if (string.IsNullOrEmpty(settings.FlipAndMirrorHorizontalEachRectFileMask)) {
+                return FlipAndMirrorType.None;
+            }
+            return isFileMaskMatch(fileName, settings.FlipAndMirrorHorizontalEachRectFileMask) ? FlipAndMirrorType.FlipAndMirrorXY : FlipAndMirrorType.None;
         }
 
         //     
@@ -596,10 +597,11 @@ namespace CardRotager {
                         prepareProcessImageState();
                         return openPlusProcess();
                     }
-                    break;
+                    Image initImage = (Bitmap) pbSource.Image.Clone();
+                    readImage(initImage);
+                    return processImage();
                 }
             }
-            return true;
         }
 
         private void workFlowImageProcessExecute() {

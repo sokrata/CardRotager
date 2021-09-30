@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Edge.cs" />
     <Compile Include="Helper\Drawler.cs" />
+    <Compile Include="Helper\FlipAndMirrorType.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Helper\PropertyObject.cs" />
     <Compile Include="Helper\Form1.cs">

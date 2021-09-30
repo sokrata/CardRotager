@@ -27,6 +27,12 @@ namespace CardRotager {
         private const bool CONVERT_OPEN_IMAGE = true;
         private const int DOTLINE_X_START_ADD_WIDTH = 100;
         private const int DOTLINE_X_END_ADD_WIDTH = 0;
+        
+        private const int EXT_WIDTH = 150;
+        private const int EXT_HEIGHT = 150;
+        private const int WIDTH_8_8_CM = 4160 + EXT_WIDTH; //px
+        private const int HEIGHT_6_3_CM = 2965 + EXT_HEIGHT; //px
+        
         private const string debug = "Отладка";
         private const string source = "Оригинальная картинка";
         private const string target = "Результирующая картинка";
@@ -38,7 +44,9 @@ namespace CardRotager {
         private const string xmlShowDetailDotsOfImageNumber = "showDetailDotsOfImageNumber";
         private const string xmlShowRuler = "showRuler";
         private const string xmlHVThickLine = "HVThickLine";
-        private const string xmlFlipHorizontalEachRect = "flipHorizontalEachRect";
+        private const string xmlFlipAndMirrorHorizontalEachRect = "flipAndMirrorHorizontalEachRect";
+        private const string xmlFlipVerticalEachRect = "flipVerticalEachRect";
+        private const string xmlFlipAndMirrorHorizontalEachRectFileMask = "flipAndMirrorHorizontalEachRectFileMask";
         private const string xmlMinLineSizeX = "minLineSizeX";
         private const string xmlMinLineSizeY = "minLineSizeY";
         private const string xmlDotLineXStartAddWidth = "dotLineXStartAddWidth";
@@ -55,6 +63,9 @@ namespace CardRotager {
         private const string xmlCutMarkColor = "cutMarkColor";
         private const string xmlCutMarkRadius = "cutMarkRadius";
         private const string xmlCutMarkThick = "cutMarkThick";
+        private const string xmlMinCardWidth = "minCardWidth";
+        private const string xmlMinCardHeight = "minCardHeight";
+        private const string xmlCenteredImage = "centeredImage";
         private const string xmlProcessWhenOpen = "processWhenOpen";
         private const string xmlCropPaddingTop = "cropPaddingTop";
         private const string xmlCropPaddingRight = "cropPaddingRight";
@@ -64,7 +75,6 @@ namespace CardRotager {
         private const string xmlCustomSavePath = "customSavePath";
         private const string xmlDrawTextOnTargetImage = "drawTextOnTargetImage";
         private const string xmlDrawTextTargetFont = "drawTextTargetFont";
-        private const string xmlFlipHorizontalEachRectFileMask = "flipHorizontalEachRectFileMask";
         private const string xmlShowHorVertLines = "showHorVertLines";
         private const string xmlNewDpiY = "newDpiY";
         private const string xmlNewDpiX = "newDpiX";
@@ -75,9 +85,10 @@ namespace CardRotager {
             this.log = log;
             PropertyObject = new PropertyObject();
 
-            PropertyObject.addParam(target, xmlRotateFoundSubImages, false, true, l("Вращение найденных изображений карт"));
-            PropertyObject.addParam(target, xmlFlipHorizontalEachRect, false, true, l("Отразить по горизонтали каждый прямоугольник внутри себя и самих прямоугольник относительно друг друга"));
-            PropertyObject.addParam(target, xmlFlipHorizontalEachRectFileMask, "", true, l("Маска имени файла, когда изменить установленный в свойстве FlipHorizontalEachRect статус на противоположный"));
+            PropertyObject.addParam(target, xmlRotateFoundSubImages, true, true, l("Вращение найденных изображений карт"));
+            PropertyObject.addParam(target, xmlFlipAndMirrorHorizontalEachRect, false, true, l("Отразить по горизонтали каждый прямоугольник внутри себя (перевернуть) и самих прямоугольник относительно друг друга (отзеркалить)"));
+            PropertyObject.addParam(target, xmlFlipAndMirrorHorizontalEachRectFileMask, "", true, l("Маска имени файла, когда изменить установленный в свойстве FlipHorizontalEachRect статус на противоположный"));
+            PropertyObject.addParam(target, xmlFlipVerticalEachRect, false, true, l("Отразить по вертикали каждый прямоугольник внутри себя (перевернуть) только"));
             PropertyObject.addParam(target, xmlCustomSavePath, "", true, l("Путь к папке для сохранения. Если не заполнено, используется путь предлагаемый диалогом Windows"), browsable: true, readOnly: false, editor: new UIFolderNameEditor());
             PropertyObject.addParam(target, xmlDrawTextOnTargetImage, "", true, l("Текст, отображаемый над картами, если заполнен (пример: {fno} выводит имя файла без расширения). Доступны автозамены: {fn} - имя главного файла, {fno} - имя глав.файла без расширения и точки, {ext} - точка и расширение файла"));
             PropertyObject.addParam(target, xmlDrawTextTargetFont, "", true, l("Шрифт для текста отображаемый над картами. Если не указан используется системный шрифт для заголовков, установленный в теме Windows"), browsable: true, readOnly: false, editor: new UIFontChooser(log));
@@ -85,16 +96,19 @@ namespace CardRotager {
             PropertyObject.addParam(target, xmlCutMarkColor, CUT_MARK_COLOR, true, l("Показывать список точек (голубым цветом) для номера карты по которым создаются линии (0 - не показывать)"));
             PropertyObject.addParam(target, xmlCutMarkRadius, CUT_MARK_RADIUS, true, l("Радиус луча для точки реза (если задан параметр CutMarkShowOnTargetImageMask)"));
             PropertyObject.addParam(target, xmlCutMarkThick, CUT_MARK_THICK, true, l("Толщина линий для точек реза (если задан параметр CutMarkShowOnTargetImageMask)"));
+            PropertyObject.addParam(target, xmlMinCardWidth, WIDTH_8_8_CM, true, l("Минимальная ширина карты для размещения в центрирующей сетке на результирующей картинке. Указывается в пикселях"));
+            PropertyObject.addParam(target, xmlMinCardHeight, HEIGHT_6_3_CM, true, l("Минимальная высота карты для размещения в центрирующей сетке на результирующей картинке. Указывается в пикселях"));
+            PropertyObject.addParam(target, xmlCenteredImage, true, true, l("Центрировать ли итоговое изображение (true - центрировать)"));
             PropertyObject.addParam(target, xmlNewDpiX, 0, true, l("Новое разрешение для итоговой картинки по горизонтали. Если не задано (или 0), сохраняется оригинальное"));
             PropertyObject.addParam(target, xmlNewDpiY, 0, true, l("Новое разрешение для итоговой картинки по вертикали. Если не задано (или 0), сохраняется оригинальное"));
 
             PropertyObject.addParam(debug, xmlProcessCycleF4, false, true, l("F4 действует по кругу"));
             PropertyObject.addParam(debug, xmlShowImageFoundContour, false, true, l("Показывать найденные контуры карт"));
             PropertyObject.addParam(debug, xmlShowDetailDotsOfImageNumber, 0, true, l("Показывать список точек (голубым цветом) для номера карты по которым создаются линии (0 - не показывать)"));
-            PropertyObject.addParam(debug, xmlShowRuler, false, true, l("Отображение линии-текст линейки"));
-            PropertyObject.addParam(debug, xmlShowHorVertLines, false, true, l("Отображение горизонтальных и вертикальных линий"));
+            PropertyObject.addParam(debug, xmlShowRuler, true, true, l("Отображение линии-текст линейки"));
+            PropertyObject.addParam(debug, xmlShowHorVertLines, true, true, l("Отображение горизонтальных и вертикальных линий"));
             PropertyObject.addParam(debug, xmlHVThickLine, THICK, true, l("Толщина линий для горизонтальных и вертикальных линий для параметра ShowHorVertLines"));
-            PropertyObject.addParam(debug, xmlShowAngleLines, false, true, l("Отображение линий по которой рассчитывает угол"));
+            PropertyObject.addParam(debug, xmlShowAngleLines, true, true, l("Отображение линий по которой рассчитывает угол"));
             PropertyObject.addParam(debug, xmlShowImageTargetFrame, false, true, l("Показывать области куда помещаются карты"));
             PropertyObject.addParam(debug, xmlProcessWhenOpen, CONVERT_OPEN_IMAGE, true, l("При открытии сразу обработать"));
             PropertyObject.addParam(debug, xmlSaveEachRectangleFileName, "", true, l("Путь к папке и имя для сохранения найденных карт на картинке (пример: c:\\temp\\{fno}\\img{#}.bmp). Доступны автозамены: {#} - <номер карты>, {fn} - имя главного файла, {fno} - имя глав.файла без расширения и точки. Вместо bmp можно подставить расширения jpg, png, tif. Если не заполнено, не сохраняется"), browsable: true, readOnly: false, editor: new UIFolderNameEditor());
@@ -160,14 +174,19 @@ namespace CardRotager {
             set => PropertyObject[xmlHVThickLine].Value = value;
         }
 
-        public bool FlipHorizontalEachRect {
-            get => (bool) PropertyObject[xmlFlipHorizontalEachRect].Value;
-            set => PropertyObject[xmlFlipHorizontalEachRect].Value = value;
+        public bool FlipAndMirrorHorizontalEachRect {
+            get => (bool) PropertyObject[xmlFlipAndMirrorHorizontalEachRect].Value;
+            set => PropertyObject[xmlFlipAndMirrorHorizontalEachRect].Value = value;
         }
 
-        public string FlipHorizontalEachRectFileMask {
-            get => (string) PropertyObject[xmlFlipHorizontalEachRectFileMask].Value;
-            set => PropertyObject[xmlFlipHorizontalEachRectFileMask].Value = value;
+        public string FlipAndMirrorHorizontalEachRectFileMask {
+            get => (string) PropertyObject[xmlFlipAndMirrorHorizontalEachRectFileMask].Value;
+            set => PropertyObject[xmlFlipAndMirrorHorizontalEachRectFileMask].Value = value;
+        }
+
+        public bool FlipVerticalEachRect {
+            get => (bool) PropertyObject[xmlFlipVerticalEachRect].Value;
+            set => PropertyObject[xmlFlipVerticalEachRect].Value = value;
         }
 
         public int MinLineSizeX {
@@ -248,6 +267,19 @@ namespace CardRotager {
         public int CutMarkThick {
             get => (int) PropertyObject[xmlCutMarkThick].Value;
             set => PropertyObject[xmlCutMarkThick].Value = value;
+        }
+        public int MinCardWidth {
+            get => (int) PropertyObject[xmlMinCardWidth].Value;
+            set => PropertyObject[xmlMinCardWidth].Value = value;
+        }
+        public int MinCardHeight {
+            get => (int) PropertyObject[xmlMinCardHeight].Value;
+            set => PropertyObject[xmlMinCardHeight].Value = value;
+        }
+
+        public bool CenteredImage {
+            get => (bool) PropertyObject[xmlCenteredImage].Value;
+            set => PropertyObject[xmlCenteredImage].Value = value;
         }
 
         public int NewDpiX {

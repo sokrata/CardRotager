@@ -1,12 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
 namespace CardRotager {
     public class Drawler {
-        const int penWidth = 7;
-        Pen penFuchsia = new Pen(Color.Fuchsia, penWidth);
+        private const int MIN_HOR_PADDING = 300;
+        private const int MIN_VERT_PADDING = 300;
+        private const int MIN_HOR_SPACING = 0;
+        private const int penWidth = 7;
+        private Pen penFuchsia = new Pen(Color.Fuchsia, penWidth);
         private StringFormat headerStringFormat;
+
+        private int paddingHor;
+        private int paddingVert;
+        private int X1;
+        private int X2;
+        private int X3;
+        private List<int> listY;
+        private int imageWidth;
+        private int imageHeight;
+        private int cardWidth;
+        private int cardHeight;
 
         /// <summary>
         /// Размер шрифта для текста
@@ -14,6 +29,7 @@ namespace CardRotager {
         private Font FontTextLine { get; set; }
 
         public Drawler() {
+            listY = new List<int>();
             FontTextLine = new Font("Arial", 120);
             headerStringFormat = new StringFormat(StringFormatFlags.FitBlackBox);
             headerStringFormat.LineAlignment = StringAlignment.Center;
@@ -103,37 +119,23 @@ namespace CardRotager {
             graphics.DrawLine(pen, x, y - CrossRadius, x, y + CrossRadius);
         }
 
-        private int paddingHor;
-        private int paddingVert;
-        private int X1;
-        private int X2;
-        private int X3;
-        private int Y1;
-        private int Y2;
-        private int Y3;
-        private int Y4;
-        private int Y5;
-        private int imageWidth;
-        private int imageHeight;
-        private int cardWidth;
-        private int cardHeight;
-
-        public void calcFrame(int imageWidth, int imageHeight, int cardWidth, int cardHeight) {
+        public void calcFrame(int imageWidth, int imageHeight, int cardWidth, int cardHeight, int rowCount, bool isCenteredImage) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
             this.cardWidth = cardWidth;
             this.cardHeight = cardHeight;
-            paddingHor = (imageWidth - cardWidth * 2) / 2;
-            paddingVert = (imageHeight - cardHeight * 4) / 2;
+            paddingHor = isCenteredImage ? (imageWidth - cardWidth * 2) / 2 : MIN_HOR_PADDING;
+            paddingVert = isCenteredImage ? (imageHeight - cardHeight * 4) / 2 : MIN_VERT_PADDING;
             X1 = paddingHor;
-            X2 = imageWidth / 2;
-            X3 = imageWidth - paddingHor;
-            Y1 = paddingVert;
-            Y2 = paddingVert + cardHeight;
-            Y3 = paddingVert + cardHeight * 2;
-            Y4 = paddingVert + cardHeight * 3;
-            Y5 = imageHeight - paddingVert;
+            X2 = isCenteredImage ? imageWidth / 2 : paddingHor + cardWidth + MIN_HOR_SPACING;
+            X3 = isCenteredImage ? imageWidth - paddingHor : paddingHor + cardWidth * 2 + MIN_HOR_SPACING;
+            listY.Clear();
+            for (int rowIndex = 0; rowIndex <= rowCount; rowIndex++) {
+                listY.Add(paddingVert + cardHeight * rowIndex);
+            }
+            //Y5 = imageHeight - paddingVert;
         }
+
         // const int X1 = 500;
         // const int X2 = 4961;
         // const int X3 = 9129;
@@ -143,21 +145,29 @@ namespace CardRotager {
         // const int Y4 = 9760;
         // const int Y5 = 12959;
 
-        public List<Rectangle> makeFrame() {
-            List<Rectangle> rects = new List<Rectangle>() {
-                //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
-                //first colunm:
-                new Rectangle(X1, Y1, (X2 - X1), (Y2 - Y1)),
-                new Rectangle(X1, Y2, (X2 - X1), (Y3 - Y2)),
-                new Rectangle(X1, Y3, (X2 - X1), (Y4 - Y3)),
-                new Rectangle(X1, Y4, (X2 - X1), (Y5 - Y4)),
-
-                //second column:
-                new Rectangle(X2, Y1, (X3 - X2), (Y2 - Y1)),
-                new Rectangle(X2, Y2, (X3 - X2), (Y3 - Y2)),
-                new Rectangle(X2, Y3, (X3 - X2), (Y4 - Y3)),
-                new Rectangle(X2, Y4, (X3 - X2), (Y5 - Y4))
-            };
+        public List<Rectangle> makeFrame(int rowCount) {
+            List<Rectangle> rects = new List<Rectangle>();
+            // {
+            //     //rects.Add(new Rectangle(X1 - EXTEND_SIDE, Y1 - EXTEND_SIDE, (X2 - X1) + EXTEND_SIDE, (Y2 - Y1) + EXTEND_SIDE));
+            //     //first colunm:
+            //     new Rectangle(X1, listY[0], (X2 - X1), (listY[1] - listY[0])),
+            //     new Rectangle(X1, listY[1], (X2 - X1), (listY[2] - listY[1])),
+            //     new Rectangle(X1, listY[2], (X2 - X1), (listY[3] - listY[2])),
+            //     new Rectangle(X1, listY[3], (X2 - X1), (listY[4] - listY[3])),
+            //     
+            //
+            //     //second column:
+            //     new Rectangle(X2, listY[0], (X3 - X2), (listY[1] - listY[0])),
+            //     new Rectangle(X2, listY[1], (X3 - X2), (listY[2] - listY[1])),
+            //     new Rectangle(X2, listY[2], (X3 - X2), (listY[3] - listY[2])),
+            //     new Rectangle(X2, listY[3], (X3 - X2), (listY[4] - listY[3]))
+            // };
+            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
+               rects.Add(new Rectangle(X1, listY[rowIndex - 1], (X2 - X1), (listY[rowIndex] - listY[rowIndex - 1])));
+            }
+            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
+                rects.Add(new Rectangle(X2, listY[rowIndex - 1], (X3 - X2), (listY[rowIndex] - listY[rowIndex - 1])));
+            }
             return rects;
         }
 
@@ -171,19 +181,15 @@ namespace CardRotager {
             gr.DrawLine(penFrame, X1, 0, X1, imageHeight);
             gr.DrawLine(penFrame, X2, 0, X2, imageHeight);
             gr.DrawLine(penFrame, X3, 0, X3, imageHeight);
-            gr.DrawLine(penFrame, 0, Y1, imageWidth, Y1);
-            gr.DrawLine(penFrame, 0, Y2, imageWidth, Y2);
-            gr.DrawLine(penFrame, 0, Y3, imageWidth, Y3);
-            gr.DrawLine(penFrame, 0, Y4, imageWidth, Y4);
-            gr.DrawLine(penFrame, 0, Y5, imageWidth, Y5);
+            foreach (int y in listY) {
+                gr.DrawLine(penFrame, 0, y, imageWidth, y);
+            }
         }
 
         public void drawTargetCutMark(Graphics gr, Pen penCutMark, int crossRadius) {
-            drawLineCross(gr, penCutMark, Y1, crossRadius);
-            drawLineCross(gr, penCutMark, Y2, crossRadius);
-            drawLineCross(gr, penCutMark, Y3, crossRadius);
-            drawLineCross(gr, penCutMark, Y4, crossRadius);
-            drawLineCross(gr, penCutMark, Y5, crossRadius);
+            foreach (int y in listY) {
+                drawLineCross(gr, penCutMark, y, crossRadius);
+            }
         }
 
         private void drawLineCross(Graphics gr, Pen penFrame, int yPos, int crossRadius) {
@@ -209,7 +215,7 @@ namespace CardRotager {
         }
 
         public void drawText(Graphics graphics, Font headerFont, string text) {
-            graphics.DrawString(text, headerFont, SystemBrushes.ControlText, new Rectangle(0, 0, imageWidth, Y1), headerStringFormat);
+            graphics.DrawString(text, headerFont, SystemBrushes.ControlText, new Rectangle(0, 0, imageWidth, listY[0]), headerStringFormat);
         }
     }
 }
