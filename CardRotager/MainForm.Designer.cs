@@ -496,7 +496,7 @@ namespace CardRotager {
             // 
             this.form2ToolStripMenuItem1.Name = "form2ToolStripMenuItem1";
             this.form2ToolStripMenuItem1.Size = new System.Drawing.Size(268, 30);
-            this.form2ToolStripMenuItem1.Text = "Изменить разрешение";
+            this.form2ToolStripMenuItem1.Text = "Операции";
             this.form2ToolStripMenuItem1.Click += new System.EventHandler(this.form2ToolStripMenuItem1_Click);
             // 
             // saveTextForTranslateToolStripMenuItem

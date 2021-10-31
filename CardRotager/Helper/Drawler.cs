@@ -114,7 +114,7 @@ namespace CardRotager {
             graphics.FillRectangle(brush, x - radiusSide, y - radiusSide, radiusSide * 2, radiusSide * 2);
         }
 
-        private void drawCross(Graphics graphics, Pen pen, int x, int y, int CrossRadius) {
+        public static void drawCross(Graphics graphics, Pen pen, int x, int y, int CrossRadius) {
             graphics.DrawLine(pen, x - CrossRadius, y, x + CrossRadius, y);
             graphics.DrawLine(pen, x, y - CrossRadius, x, y + CrossRadius);
         }

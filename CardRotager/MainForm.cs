@@ -194,7 +194,8 @@ namespace CardRotager {
                 }
             }
             if (settings.NewDpiX > 0 || settings.NewDpiY > 0) {
-                return CardRotager.ProcessImageForm.processBatchFile(targetImage, settings.NewDpiX, settings.NewDpiY);
+                int cnt = 0;
+                return CardRotager.ProcessImageForm.processBatchFile(targetImage, settings.PropertyObject, 1, ref cnt);
             }
             return targetImage;
         }

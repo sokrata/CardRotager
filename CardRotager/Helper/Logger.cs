@@ -19,6 +19,10 @@ namespace CardRotager {
         public string l(string text) {
             return localize.localize(text);
         }
+        
+        public string l(string text, params object[] args) {
+            return string.Format(localize.localize(text), args);
+        }
 
         public void AppendLine(string text) {
             sb.AppendLine(text);

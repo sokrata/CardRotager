@@ -111,12 +111,26 @@ namespace CardRotager {
         public int i(string param) {
             return (int) props[param].Value;
         }
+        public bool b(string param) {
+            return (bool) props[param].Value;
+        }
         public string s(string param) {
             return (string) props[param].Value;
         }
 
+        public Color clr(string param) {
+            return (Color) props[param].Value;
+        }
+        
+        public double d(string param) {
+            return (double) props[param].Value;
+        }
+
         public void saveToXmlNode(XmlElement xmlNode) {
             foreach (DynProperty property in this) {
+                if (!property.SaveLoad) {
+                    continue;
+                }
                 xmlNode.SetAttribute(property.Name, property.StringValue);
             }
         }
@@ -125,6 +139,9 @@ namespace CardRotager {
             foreach (XmlNode property in element.Attributes) {
                 string name = property.Name;
                 if (ContainProperty(name)) {
+                    if (!this[name].SaveLoad) {
+                        continue;
+                    }
                     this[name].StringValue = property.Value;
                 }
             }
@@ -152,6 +169,7 @@ namespace CardRotager {
             saveToXmlNode(xmlNode);
             xmlDoc.Save(fileName);
         }
+
     }
 
     public class DynProperty {
