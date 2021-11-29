@@ -23,6 +23,7 @@ namespace CardRotager {
         private const string xmlSplitCutMarkColor = "splitCutMarkColor";
         private const string xmlSplitCutMarkRadius = "splitCutMarkRadius";
         private const string xmlSplitCutMarkThick = "splitCutMarkThick";
+        private const string xmlUseFixedResolution = "useFixedResolution";
         private static readonly Color CUT_MARK_COLOR = Color.Gray;
         private const int CUT_MARK_RADIUS = 20;
         private const int CUT_MARK_THICK = 7;
@@ -63,6 +64,7 @@ namespace CardRotager {
             prop.addParam(split, xmlSplitShowCutMark, false, false, l("Показывать метки"));
             prop.addParam(split, xmlSplitCutMarkColor, CUT_MARK_COLOR, true, l("Цвет точки реза (если задан параметр splitShowCutMark)"));
             prop.addParam(split, xmlSplitCutMarkRadius, CUT_MARK_RADIUS, true, l("Радиус луча для точки реза (если задан параметр splitShowCutMark)"));
+            prop.addParam(split, xmlUseFixedResolution, 0, true, l("Использовать фиксированный DPI вместо встроенного (0 - не использовать)"));
             propertyGrid1.SelectedObject = prop;
             openFileNames = new List<string>();
         }
@@ -121,8 +123,8 @@ namespace CardRotager {
         public static Bitmap processBatchFile(Image srcImg, PropertyObject prop, int functionType, ref int imgCnt) {
             int xDpi = prop.i(newDpiW);
             int yDpi = prop.i(newDpiH);
-            double srcDpiW = srcImg.HorizontalResolution;
-            double srcDpiH = srcImg.VerticalResolution;
+            double srcDpiW = prop.i(xmlUseFixedResolution) > 0 ? prop.i(xmlUseFixedResolution): srcImg.HorizontalResolution;
+            double srcDpiH = prop.i(xmlUseFixedResolution) > 0 ? prop.i(xmlUseFixedResolution) : srcImg.VerticalResolution;
             double dstDpiW = xDpi > 0 ? xDpi : srcDpiW;
             double dstDpiH = yDpi > 0 ? xDpi : srcDpiH;
             double ratioH = srcDpiW / dstDpiW;
